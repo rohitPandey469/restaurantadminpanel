@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { BACKEND_URL } from "../App";
 
 const Reservations = () => {
   const [formData, setFormData] = useState({
@@ -20,13 +21,26 @@ const Reservations = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitMessage(null);
     
-    // In a real application, this would be an API call
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/reservations/book`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to submit reservation');
+      }
+      
       setSubmitMessage({
         type: "success",
         text: "Reservation request submitted! We'll confirm your booking shortly."
@@ -43,7 +57,16 @@ const Reservations = () => {
         occasion: "",
         specialRequests: ""
       });
-    }, 1500);
+      
+    } catch (error) {
+      console.error('Reservation error:', error);
+      setSubmitMessage({
+        type: "error",
+        text: error.message || "Something went wrong. Please try again or contact us directly."
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   // Get tomorrow's date as the minimum date for reservation

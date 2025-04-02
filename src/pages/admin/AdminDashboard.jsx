@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { BACKEND_URL } from "../../App";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -11,14 +12,9 @@ const AdminDashboard = () => {
 
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   
-  const [recentReservations, setRecentReservations] = useState([
-    { id: 1, name: "Amit Kumar", date: "2025-04-01", time: "19:00", guests: 4, status: "confirmed", email: "amit@example.com", phone: "+91 98765-43210" },
-    { id: 2, name: "Priya Sharma", date: "2025-04-02", time: "20:30", guests: 2, status: "pending", email: "priya@example.com", phone: "+91 87654-32109" },
-    { id: 3, name: "Rahul Singh", date: "2025-04-02", time: "18:00", guests: 6, status: "confirmed", email: "rahul@example.com", phone: "+91 76543-21098" },
-    { id: 4, name: "Neha Patel", date: "2025-04-03", time: "19:30", guests: 3, status: "pending", email: "neha@example.com", phone: "+91 65432-10987" },
-    { id: 5, name: "Karan Malhotra", date: "2025-04-01", time: "18:30", guests: 2, status: "confirmed", email: "karan@example.com", phone: "+91 54321-09876" },
-    { id: 6, name: "Ananya Gupta", date: "2025-04-03", time: "20:00", guests: 5, status: "confirmed", email: "ananya@example.com", phone: "+91 43210-98765" },
-  ]);
+  const [recentReservations, setRecentReservations] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   
   const [recentOrders, setRecentOrders] = useState([
     { id: 101, customer: "Vikram Malhotra", amount: 89.99, status: "completed", date: "2025-03-30" },
@@ -27,11 +23,91 @@ const AdminDashboard = () => {
     { id: 104, customer: "Deepak Sharma", amount: 67.80, status: "processing", date: "2025-03-31" },
   ]);
   
-  // Filter reservations by selected date
-  const filteredReservations = recentReservations.filter(
-    reservation => reservation.date === selectedDate
-  );
+// Fetch reservations data from API
+useEffect(() => {
+  const fetchReservations = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/reservations/all`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch reservations: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Process the data and ensure each reservation has a status
+      const processedReservations = data.map(reservation => ({
+        ...reservation,
+        // Set status to "confirmed" if not present
+        status: reservation.status || "confirmed"
+      }));
+      
+      console.log(processedReservations)
+      setRecentReservations(processedReservations);
+      
+      // Update pending reservations count in stats
+      const pendingCount = processedReservations.filter(
+        res => res.status === "pending"
+      ).length;
+      
+      setStats(prevStats => ({
+        ...prevStats,
+        pendingReservations: pendingCount
+      }));
+
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching reservations:", err);
+      setError("Failed to load reservations. Please try again later.");
+
+      // Fallback to sample data if API call fails
+      const sampleReservations = [
+        { id: 1, name: "Amit Kumar", date: "2025-04-01", time: "19:00", guests: 4, status: "confirmed", email: "amit@example.com", phone: "+91 98765-43210" },
+        { id: 2, name: "Priya Sharma", date: "2025-04-02", time: "20:30", guests: 2, status: "pending", email: "priya@example.com", phone: "+91 87654-32109" },
+        { id: 3, name: "Rahul Singh", date: "2025-04-02", time: "18:00", guests: 6, status: "confirmed", email: "rahul@example.com", phone: "+91 76543-21098" },
+        { id: 4, name: "Neha Patel", date: "2025-04-03", time: "19:30", guests: 3, status: "pending", email: "neha@example.com", phone: "+91 65432-10987" },
+        { id: 5, name: "Karan Malhotra", date: "2025-04-01", time: "18:30", guests: 2, status: "confirmed", email: "karan@example.com", phone: "+91 54321-09876" },
+        { id: 6, name: "Ananya Gupta", date: "2025-04-03", time: "20:00", guests: 5, status: "confirmed", email: "ananya@example.com", phone: "+91 43210-98765" },
+      ];
+      setRecentReservations(sampleReservations);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchReservations();
+}, []);
+
+  // Filter reservations by selected date (showing all reservations for the entire 24-hour period)
+const filteredReservations = recentReservations.filter(reservation => {
+  // Handle different date storage formats
+  let reservationDate;
   
+  // If date is a complete ISO string with 'T' separator (e.g., "2025-04-01T12:00:00")
+  if (reservation.date && reservation.date.includes('T')) {
+    reservationDate = reservation.date.split('T')[0];
+  } 
+  // If date is stored as a simple date string (e.g., "2025-04-01")
+  else if (reservation.date) {
+    reservationDate = reservation.date;
+  } 
+  // If date and time are separate fields (e.g., date: "2025-04-01", time: "19:00")
+  else if (reservation.date_field) {
+    reservationDate = reservation.date_field;
+  }
+  // Fallback if no date field is found
+  else {
+    return false;
+  }
+  
+  // Extract the value from the selected date dropdown
+  const selectedDateValue = selectedDate.split('T')[0];
+  
+  // Compare just the date portions
+  return reservationDate === selectedDateValue;
+});
+
   // Group reservations by date for the date selector
   const reservationDates = [...new Set(recentReservations.map(res => res.date))].sort();
   

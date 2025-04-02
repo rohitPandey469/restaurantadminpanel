@@ -10,6 +10,8 @@ import AdminBanners from "./pages/admin/AdminBanners";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Login from "./pages/Login";
 
+export const BACKEND_URL = "https://rest-backend-czin.onrender.com";
+
 // Protection for admin routes
 const AdminRoute = ({ children }) => {
   const user = JSON.parse(localStorage.getItem("user"));
