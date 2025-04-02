@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Menu from "./pages/Menu";
@@ -8,25 +8,47 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminMenu from "./pages/admin/AdminMenu";
 import AdminBanners from "./pages/admin/AdminBanners";
 import ErrorBoundary from "./components/ErrorBoundary";
-
-const DemoUser = {
-  name: "John Doe",
-  role: "admin", // or "user"
-};
+import Login from "./pages/Login";
 
 // Protection for admin routes
 const AdminRoute = ({ children }) => {
-  // const { user } = useSelector((state) => state.auth);
-  const user = DemoUser;
+  const user = JSON.parse(localStorage.getItem("user"));
   return user?.role === "admin" ? children : <Navigate to="/" />;
 };
 
+// Protection for authenticated routes
+const ProtectedRoute = ({ children }) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  return user ? children : <Navigate to="/login" />;
+};
+
 export default function App() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // Check if user is logged in
+    const loggedInUser = localStorage.getItem("user");
+    if (loggedInUser) {
+      setUser(JSON.parse(loggedInUser));
+    }
+  }, []);
+
   return (
     <Router>
       <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<Layout><Outlet /></Layout>}>
+        {/* Login Route - accessible to everyone */}
+        <Route path="/login" element={
+          user ? <Navigate to="/" /> : <Login />
+        } />
+
+        {/* Protected Routes - require authentication */}
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Layout>
+              <Outlet />
+            </Layout>
+          </ProtectedRoute>
+        }>
           <Route index element={<Home />} />
           <Route path="menu" element={<Menu />} />
           <Route path="reserve" element={<Reservations />} />
@@ -41,6 +63,9 @@ export default function App() {
           {/* 404 Route */}
           <Route path="*" element={<ErrorBoundary error={{ status: 404 }} />} />
         </Route>
+
+        {/* Catch-all route to redirect to login if not authenticated */}
+        <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </Router>
   );

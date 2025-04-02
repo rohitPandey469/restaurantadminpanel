@@ -24,14 +24,14 @@ const Login = () => {
 
     try {
       // Mock authentication - replace with actual authentication logic
-      if (credentials.email === "admin@restaurant.com" && credentials.password === "admin123") {
+      if (credentials.email === "admin@quaantisc.com" && credentials.password === "admin@quaantisc.com") {
         localStorage.setItem("user", JSON.stringify({
           name: "Admin User",
           email: credentials.email,
           role: "admin"
         }));
         navigate("/admin/dashboard");
-      } else if (credentials.email === "user@example.com" && credentials.password === "user123") {
+      } else if (credentials.email === "user@quaantisc.com" && credentials.password === "user@quaantisc.com") {
         localStorage.setItem("user", JSON.stringify({
           name: "Regular User",
           email: credentials.email,
@@ -69,7 +69,7 @@ const Login = () => {
               Email
             </label>
             <input
-              className="input-field"
+              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500"
               id="email"
               type="email"
               name="email"
@@ -85,7 +85,7 @@ const Login = () => {
               Password
             </label>
             <input
-              className="input-field"
+              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500"
               id="password"
               type="password"
               name="password"
@@ -114,7 +114,7 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full bg-amber-700 hover:bg-amber-800 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline transition-colors"
+            className="w-full cursor-pointer bg-amber-700 hover:bg-amber-800 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline transition-colors"
             disabled={isLoading}
           >
             {isLoading ? "Signing in..." : "Sign In"}
@@ -124,8 +124,8 @@ const Login = () => {
         <div className="mt-8 text-center text-sm text-gray-600">
           <span>Demo accounts:</span>
           <div className="mt-2">
-            <p>Admin: admin@restaurant.com / admin123</p>
-            <p>User: user@example.com / user123</p>
+            <p>Admin: admin@quaantisc.com</p>
+            <p>User: user@quaantisc.com</p>
           </div>
         </div>
       </div>

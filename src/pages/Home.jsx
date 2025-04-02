@@ -28,28 +28,28 @@ const Home = () => {
       id: 1,
       name: "Signature Pasta",
       description: "Homemade pasta with our special sauce",
-      price: 15.99,
+      price: 1320, // Price in INR
       image: "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=500&auto=format&fit=crop"
     },
     {
       id: 2,
       name: "Grilled Salmon",
       description: "Fresh salmon with seasonal vegetables",
-      price: 22.99,
+      price: 1899, // Price in INR
       image: "https://images.unsplash.com/photo-1485704686097-ed47f7263ca4?w=500&auto=format&fit=crop"
     },
     {
       id: 3,
       name: "Classic Burger",
       description: "Juicy beef patty with all the fixings",
-      price: 13.99,
+      price: 1150, // Price in INR
       image: "https://images.unsplash.com/photo-1565299507177-b0ac66763828?w=500&auto=format&fit=crop"
     },
     {
       id: 4,
       name: "Chocolate Dessert",
       description: "Rich chocolate cake with vanilla ice cream",
-      price: 8.99,
+      price: 750, // Price in INR
       image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&auto=format&fit=crop"
     }
   ]);
@@ -62,6 +62,15 @@ const Home = () => {
     }, 5000);
     return () => clearInterval(interval);
   }, [banners.length]);
+
+  // Format price in INR
+  const formatINR = (price) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
 
   return (
     <div className="space-y-12">
@@ -132,7 +141,7 @@ const Home = () => {
                 <h3 className="font-bold text-lg text-amber-900">{item.name}</h3>
                 <p className="text-gray-600 text-sm mb-2">{item.description}</p>
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-amber-700">${item.price.toFixed(2)}</span>
+                  <span className="font-bold text-amber-700">{formatINR(item.price)}</span>
                   <button className="text-sm bg-amber-100 hover:bg-amber-200 text-amber-800 font-semibold py-1 px-3 rounded transition-colors">
                     Add to Order
                   </button>
