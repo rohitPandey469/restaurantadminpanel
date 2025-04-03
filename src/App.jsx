@@ -18,11 +18,11 @@ const AdminRoute = ({ children }) => {
   return user?.role === "admin" ? children : <Navigate to="/" />;
 };
 
-// Protection for authenticated routes
-const ProtectedRoute = ({ children }) => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  return user ? children : <Navigate to="/login" />;
-};
+// // Protection for authenticated routes
+// const ProtectedRoute = ({ children }) => {
+//   const user = JSON.parse(localStorage.getItem("user"));
+//   return user ? children : <Navigate to="/login" />;
+// };
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -45,11 +45,11 @@ export default function App() {
 
         {/* Protected Routes - require authentication */}
         <Route path="/" element={
-          <ProtectedRoute>
+          // <ProtectedRoute>
             <Layout>
               <Outlet />
             </Layout>
-          </ProtectedRoute>
+          // </ProtectedRoute>
         }>
           <Route index element={<Home />} />
           <Route path="menu" element={<Menu />} />

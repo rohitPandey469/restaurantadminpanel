@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const Header = ({ user, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const isAdmin = user?.role === "admin";
+
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -19,70 +21,64 @@ const Header = ({ user, onLogout }) => {
             <Link to="/" className="flex-shrink-0 flex items-center">
               <span className="text-amber-700 font-bold text-xl">Restaurant Admin</span>
             </Link>
-            
+
             {/* Desktop Navigation - hidden on mobile */}
             <nav className="hidden md:ml-6 md:flex md:items-center md:space-x-4">
               <Link
                 to="/"
-                className={`px-3 py-2 rounded-md text-sm font-medium ${
-                  location.pathname === "/" 
-                    ? "bg-amber-100 text-amber-900" 
-                    : "text-gray-700 hover:bg-amber-50"
-                }`}
+                className={`px-3 py-2 rounded-md text-sm font-medium ${location.pathname === "/"
+                  ? "bg-amber-100 text-amber-900"
+                  : "text-gray-700 hover:bg-amber-50"
+                  }`}
               >
                 Home
               </Link>
               <Link
                 to="/menu"
-                className={`px-3 py-2 rounded-md text-sm font-medium ${
-                  location.pathname === "/menu" 
-                    ? "bg-amber-100 text-amber-900" 
-                    : "text-gray-700 hover:bg-amber-50"
-                }`}
+                className={`px-3 py-2 rounded-md text-sm font-medium ${location.pathname === "/menu"
+                  ? "bg-amber-100 text-amber-900"
+                  : "text-gray-700 hover:bg-amber-50"
+                  }`}
               >
                 Menu
               </Link>
               <Link
                 to="/reserve"
-                className={`px-3 py-2 rounded-md text-sm font-medium ${
-                  location.pathname === "/reserve" 
-                    ? "bg-amber-100 text-amber-900" 
-                    : "text-gray-700 hover:bg-amber-50"
-                }`}
+                className={`px-3 py-2 rounded-md text-sm font-medium ${location.pathname === "/reserve"
+                  ? "bg-amber-100 text-amber-900"
+                  : "text-gray-700 hover:bg-amber-50"
+                  }`}
               >
                 Reservations
               </Link>
-              
+
               {/* Admin links - only shown to admin users */}
               {isAdmin && (
                 <>
                   <Link
                     to="/admin/dashboard"
-                    className={`px-3 py-2 rounded-md text-sm font-medium ${
-                      location.pathname.includes("/admin/dashboard") 
-                        ? "bg-amber-100 text-amber-900" 
-                        : "text-gray-700 hover:bg-amber-50"
-                    }`}
+                    className={`px-3 py-2 rounded-md text-sm font-medium ${location.pathname.includes("/admin/dashboard")
+                      ? "bg-amber-100 text-amber-900"
+                      : "text-gray-700 hover:bg-amber-50"
+                      }`}
                   >
                     Dashboard
                   </Link>
                   <Link
                     to="/admin/menu"
-                    className={`px-3 py-2 rounded-md text-sm font-medium ${
-                      location.pathname.includes("/admin/menu") 
-                        ? "bg-amber-100 text-amber-900" 
-                        : "text-gray-700 hover:bg-amber-50"
-                    }`}
+                    className={`px-3 py-2 rounded-md text-sm font-medium ${location.pathname.includes("/admin/menu")
+                      ? "bg-amber-100 text-amber-900"
+                      : "text-gray-700 hover:bg-amber-50"
+                      }`}
                   >
                     Admin Menu
                   </Link>
                   <Link
                     to="/admin/banners"
-                    className={`px-3 py-2 rounded-md text-sm font-medium ${
-                      location.pathname.includes("/admin/banners") 
-                        ? "bg-amber-100 text-amber-900" 
-                        : "text-gray-700 hover:bg-amber-50"
-                    }`}
+                    className={`px-3 py-2 rounded-md text-sm font-medium ${location.pathname.includes("/admin/banners")
+                      ? "bg-amber-100 text-amber-900"
+                      : "text-gray-700 hover:bg-amber-50"
+                      }`}
                   >
                     Banners
                   </Link>
@@ -90,19 +86,30 @@ const Header = ({ user, onLogout }) => {
               )}
             </nav>
           </div>
-          
+
           {/* User info and logout - Desktop */}
           <div className="hidden md:flex md:items-center">
             <div className="flex items-center space-x-3">
-              <span className="text-sm font-medium text-gray-700">
-                {user?.name}
-              </span>
-              <button 
-                onClick={onLogout}
-                className="bg-amber-100 cursor-pointer text-amber-800 hover:bg-amber-200 px-3 py-2 rounded-md text-sm font-medium transition"
-              >
-                Logout
-              </button>
+              {
+                !user ?
+                  (<button
+                    onClick={() => {
+                      localStorage.removeItem("user");
+                      navigate("/login")
+                    }}
+                    className="bg-amber-100 cursor-pointer text-amber-800 hover:bg-amber-200 px-3 py-2 rounded-md text-sm font-medium transition"
+                  >Admin Login</button>) : (<>
+                    <span className="text-sm font-medium text-gray-700">
+                      {user?.name}
+                    </span>
+                    <button
+                      onClick={onLogout}
+                      className="bg-amber-100 cursor-pointer text-amber-800 hover:bg-amber-200 px-3 py-2 rounded-md text-sm font-medium transition"
+                    >
+                      Logout
+                    </button>
+                  </>)
+              }
             </div>
           </div>
 
@@ -136,70 +143,64 @@ const Header = ({ user, onLogout }) => {
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             <Link
               to="/"
-              className={`block px-3 py-2 rounded-md text-base font-medium ${
-                location.pathname === "/" 
-                  ? "bg-amber-100 text-amber-900" 
-                  : "text-gray-700 hover:bg-amber-50"
-              }`}
+              className={`block px-3 py-2 rounded-md text-base font-medium ${location.pathname === "/"
+                ? "bg-amber-100 text-amber-900"
+                : "text-gray-700 hover:bg-amber-50"
+                }`}
               onClick={() => setIsMenuOpen(false)}
             >
               Home
             </Link>
             <Link
               to="/menu"
-              className={`block px-3 py-2 rounded-md text-base font-medium ${
-                location.pathname === "/menu" 
-                  ? "bg-amber-100 text-amber-900" 
-                  : "text-gray-700 hover:bg-amber-50"
-              }`}
+              className={`block px-3 py-2 rounded-md text-base font-medium ${location.pathname === "/menu"
+                ? "bg-amber-100 text-amber-900"
+                : "text-gray-700 hover:bg-amber-50"
+                }`}
               onClick={() => setIsMenuOpen(false)}
             >
               Menu
             </Link>
             <Link
               to="/reserve"
-              className={`block px-3 py-2 rounded-md text-base font-medium ${
-                location.pathname === "/reserve" 
-                  ? "bg-amber-100 text-amber-900" 
-                  : "text-gray-700 hover:bg-amber-50"
-              }`}
+              className={`block px-3 py-2 rounded-md text-base font-medium ${location.pathname === "/reserve"
+                ? "bg-amber-100 text-amber-900"
+                : "text-gray-700 hover:bg-amber-50"
+                }`}
               onClick={() => setIsMenuOpen(false)}
             >
               Reservations
             </Link>
-            
+
             {/* Admin links - only shown to admin users */}
             {isAdmin && (
               <>
                 <Link
                   to="/admin/dashboard"
-                  className={`block px-3 py-2 rounded-md text-base font-medium ${
-                    location.pathname.includes("/admin/dashboard") 
-                      ? "bg-amber-100 text-amber-900" 
-                      : "text-gray-700 hover:bg-amber-50"
-                  }`}
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${location.pathname.includes("/admin/dashboard")
+                    ? "bg-amber-100 text-amber-900"
+                    : "text-gray-700 hover:bg-amber-50"
+                    }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Dashboard
                 </Link>
                 <Link
                   to="/admin/menu"
-                  className={`block px-3 py-2 rounded-md text-base font-medium ${
-                    location.pathname.includes("/admin/menu") 
-                      ? "bg-amber-100 text-amber-900" 
-                      : "text-gray-700 hover:bg-amber-50"
-                  }`}
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${location.pathname.includes("/admin/menu")
+                    ? "bg-amber-100 text-amber-900"
+                    : "text-gray-700 hover:bg-amber-50"
+                    }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Admin Menu
                 </Link>
                 <Link
                   to="/admin/banners"
-                  className={`block px-3 py-2 rounded-md text-base font-medium ${
-                    location.pathname.includes("/admin/banners") 
-                      ? "bg-amber-100 text-amber-900" 
-                      : "text-gray-700 hover:bg-amber-50"
-                  }`}
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${location.pathname.includes("/admin/banners")
+                    ? "bg-amber-100 text-amber-900"
+                    : "text-gray-700 hover:bg-amber-50"
+                    }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Banners
@@ -225,15 +226,30 @@ const Header = ({ user, onLogout }) => {
               </div>
             </div>
             <div className="mt-3 px-2 space-y-1">
-              <button
-                onClick={() => {
-                  onLogout();
-                  setIsMenuOpen(false);
-                }}
-                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-amber-50"
-              >
-                Logout
-              </button>
+              {
+                !user ? (
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem("user");
+                      setIsMenuOpen(false);
+                      navigate("/login");
+                    }}
+                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-amber-50"
+                  >
+                    Admin Login
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      onLogout();
+                      setIsMenuOpen(false);
+                    }}
+                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-amber-50"
+                  >
+                    Logout
+                  </button>
+                )
+              }
             </div>
           </div>
         </div>
