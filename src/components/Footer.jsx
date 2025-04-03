@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const Footer = () => {
+const Footer = ({user}) => {
   return (
     <footer className="bg-amber-900 text-amber-50">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
@@ -36,57 +36,71 @@ const Footer = () => {
               </a>
             </div>
           </div>
-          <div className="mt-12 grid grid-cols-3 gap-8 xl:mt-0 xl:col-span-2">
+          <div style={{display:"flex", flexDirection:"row", justifyContent:"space-between"}} className="mt-12">
             <div>
               <h3 className="text-sm font-semibold text-amber-100 tracking-wider uppercase">Navigation</h3>
               <ul className="mt-4 space-y-4">
                 <li>
-                  <Link to="/" className="text-base text-amber-200 hover:text-white transition-colors">
+                  <Link onClick={()=>{
+                    window.scrollTo(0, 0);
+                  }} to="/" className="text-base text-amber-200 hover:text-white transition-colors">
                     Home
                   </Link>
                 </li>
                 <li>
-                  <Link to="/menu" className="text-base text-amber-200 hover:text-white transition-colors">
+                  <Link
+                  onClick={()=>{
+                    window.scrollTo(0, 0);
+                  }}
+                  to="/menu" className="text-base text-amber-200 hover:text-white transition-colors">
                     Menu
                   </Link>
                 </li>
                 <li>
-                  <Link to="/reserve" className="text-base text-amber-200 hover:text-white transition-colors">
+                  <Link
+                  onClick={()=>{
+                    window.scrollTo(0, 0);
+                  }}
+                  to="/reserve" className="text-base text-amber-200 hover:text-white transition-colors">
                     Reservations
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/about" className="text-base text-amber-200 hover:text-white transition-colors">
-                    About Us
                   </Link>
                 </li>
               </ul>
             </div>
-            <div>
+            {user && (
+              <div>
               <h3 className="text-sm font-semibold text-amber-100 tracking-wider uppercase">Admin</h3>
               <ul className="mt-4 space-y-4">
                 <li>
-                  <Link to="/admin/dashboard" className="text-base text-amber-200 hover:text-white transition-colors">
+                  <Link
+                  onClick={()=>{
+                    window.scrollTo(0, 0);
+                  }}
+                  to="/admin/dashboard" className="text-base text-amber-200 hover:text-white transition-colors">
                     Dashboard
                   </Link>
                 </li>
                 <li>
-                  <Link to="/admin/menu" className="text-base text-amber-200 hover:text-white transition-colors">
+                  <Link
+                  onClick={()=>{
+                    window.scrollTo(0, 0);
+                  }}
+                  to="/admin/menu" className="text-base text-amber-200 hover:text-white transition-colors">
                     Menu Management
                   </Link>
                 </li>
                 <li>
-                  <Link to="/admin/banners" className="text-base text-amber-200 hover:text-white transition-colors">
+                  <Link
+                  onClick={()=>{
+                    window.scrollTo(0, 0);
+                  }}
+                  to="/admin/banners" className="text-base text-amber-200 hover:text-white transition-colors">
                     Banner Management
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/admin/orders" className="text-base text-amber-200 hover:text-white transition-colors">
-                    Orders
                   </Link>
                 </li>
               </ul>
             </div>
+            )}
             <div>
               <h3 className="text-sm font-semibold text-amber-100 tracking-wider uppercase">Contact</h3>
               <ul className="mt-4 space-y-4">
