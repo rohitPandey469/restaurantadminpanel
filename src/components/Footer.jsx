@@ -5,7 +5,7 @@ const Footer = ({user}) => {
   return (
     <footer className="bg-amber-900 text-amber-50">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
-        <div className="xl:grid xl:grid-cols-3 xl:gap-8">
+        <div className="xl:grid xl:grid-cols-2 xl:gap-8">
           <div className="space-y-8 xl:col-span-1">
             <div>
               <span className="text-amber-50 font-bold text-2xl">Spice Kingdom</span>
@@ -36,7 +36,7 @@ const Footer = ({user}) => {
               </a>
             </div>
           </div>
-          <div style={{display:"flex", flexDirection:"row", justifyContent:"space-between"}} className="mt-12">
+          <div style={{width:"100%", display:"flex", flexDirection:"row", justifyContent:"space-between"}} className="mt-12">
             <div>
               <h3 className="text-sm font-semibold text-amber-100 tracking-wider uppercase">Navigation</h3>
               <ul className="mt-4 space-y-4">
