@@ -19,7 +19,7 @@ const Header = ({ user, onLogout }) => {
           {/* Logo and desktop navigation */}
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
-              <span className="text-amber-700 font-bold text-xl">Restaurant Admin</span>
+              <span className="text-amber-700 font-bold text-xl">Benne Berlin</span>
             </Link>
 
             {/* Desktop Navigation - hidden on mobile */}
@@ -50,6 +50,24 @@ const Header = ({ user, onLogout }) => {
                   }`}
               >
                 Reservations
+              </Link>
+              <Link
+                to="/review"
+                className={`px-3 py-2 rounded-md text-sm font-medium ${location.pathname === "/review"
+                  ? "bg-amber-100 text-amber-900"
+                  : "text-gray-700 hover:bg-amber-50"
+                  }`}
+              >
+                Review
+              </Link>
+              <Link
+                to="/coming-soon"
+                className={`px-3 py-2 rounded-md text-sm font-medium ${location.pathname === "/coming-soon"
+                  ? "bg-amber-100 text-amber-900"
+                  : "text-gray-700 hover:bg-amber-50"
+                  }`}
+              >
+                Coming Soon
               </Link>
 
               {/* Admin links - only shown to admin users */}
@@ -170,6 +188,26 @@ const Header = ({ user, onLogout }) => {
               onClick={() => setIsMenuOpen(false)}
             >
               Reservations
+            </Link>
+            <Link
+              to="/review"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${location.pathname === "/review"
+                ? "bg-amber-100 text-amber-900"
+                : "text-gray-700 hover:bg-amber-50"
+                }`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Review
+            </Link>
+            <Link
+              to="/coming-soon"
+              className={`block px-3 py-2 rounded-md text-base font-medium ${location.pathname === "/coming-soon"
+                ? "bg-amber-100 text-amber-900"
+                : "text-gray-700 hover:bg-amber-50"
+                }`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Coming Soon
             </Link>
 
             {/* Admin links - only shown to admin users */}

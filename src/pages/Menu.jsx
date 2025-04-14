@@ -107,6 +107,15 @@ const Menu = () => {
       maximumFractionDigits: 0
     }).format(price);
   };
+
+  // Format price to Euro
+  const formatEURO = (price) => {
+    return new Intl.NumberFormat('de-DE', {
+      style: 'currency',
+      currency: 'EUR',
+      maximumFractionDigits: 0
+    }).format(price);
+  }
   
   // Filter items by selected category
   const filteredItems = activeCategory === "all" 
@@ -225,7 +234,7 @@ const Menu = () => {
                   <div className="p-6">
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="text-xl font-bold text-amber-900">{item.name}</h3>
-                      <span className="text-amber-700 font-bold text-lg">{formatINR(item.price)}</span>
+                      <span className="text-amber-700 font-bold text-lg">{formatEURO(item.price)}</span>
                     </div>
                     
                     {renderDietaryIcons(item.dietary)}

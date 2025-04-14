@@ -9,6 +9,8 @@ import AdminMenu from "./pages/admin/AdminMenu";
 import AdminBanners from "./pages/admin/AdminBanners";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Login from "./pages/Login";
+import Review from "./pages/Review";
+import ComingSoon from "./pages/ComingSoon";
 
 export const BACKEND_URL = "https://rest-backend-czin.onrender.com";
 
@@ -54,6 +56,8 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="menu" element={<Menu />} />
           <Route path="reserve" element={<Reservations />} />
+          <Route path="review" element={<Review/>} />
+          <Route path="coming-soon" element={<ComingSoon/>}/>
 
           {/* Protected Admin Routes */}
           <Route path="admin" element={<AdminRoute><Outlet /></AdminRoute>}>
