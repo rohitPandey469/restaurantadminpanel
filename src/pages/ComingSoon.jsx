@@ -82,7 +82,7 @@ const ComingSoon = () => {
 
   return (
         <div className="flex-grow flex flex-col justify-center items-center py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl w-full text-center">
+        <div className="w-full text-center">
             <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
             Coming Soon
             </h1>
@@ -163,13 +163,13 @@ const ComingSoon = () => {
             </div>
 
             {/* Mystery Upcoming Dishes */}
-            <div className="mt-16">
+            <div className="w-full mt-16">
             <h2 className="text-2xl font-bold text-gray-900">New Dishes Coming to Our Menu</h2>
             <p className="mt-2 text-gray-600 max-w-2xl mx-auto">
                 Our chefs are preparing some exciting new flavors! Watch the countdown to see them revealed.
             </p>
             
-            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="w-full mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 {/* Mystery Dish 1 - North Indian Special */}
                 <div className="bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="h-48 w-full relative bg-gradient-to-r from-amber-400 to-amber-600">
