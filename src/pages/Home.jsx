@@ -72,6 +72,16 @@ const Home = () => {
     }).format(price);
   };
 
+    // Format price to Euro
+    const formatEURO = (price) => {
+      return new Intl.NumberFormat('de-DE', {
+        style: 'currency',
+        currency: 'EUR',
+        maximumFractionDigits: 0
+      }).format(price);
+    }
+    
+
   return (
     <div className="space-y-12">
       {/* Banner Carousel */}
@@ -141,7 +151,7 @@ const Home = () => {
                 <h3 className="font-bold text-lg text-amber-900">{item.name}</h3>
                 <p className="text-gray-600 text-sm mb-2">{item.description}</p>
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-amber-700">{formatINR(item.price)}</span>
+                  <span className="font-bold text-amber-700">{formatEURO(item.price)}</span>
                   <button className="text-sm bg-amber-100 hover:bg-amber-200 text-amber-800 font-semibold py-1 px-3 rounded transition-colors">
                     Add to Order
                   </button>

@@ -125,7 +125,6 @@ const Login = () => {
           <span>Demo accounts:</span>
           <div className="mt-2">
             <p>Admin: admin@quaantisc.com</p>
-            <p>User: user@quaantisc.com</p>
           </div>
         </div>
       </div>

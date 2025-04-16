@@ -1,6 +1,45 @@
 import React, { useState, useEffect } from "react";
 import { BACKEND_URL } from "../App";
 
+// Sample reviews for development
+const sampleReviews = [
+  {
+    id: 1,
+    name: "Rajesh Sharma",
+    rating: 5,
+    comment: "The butter chicken was amazing! Authentic flavors and great service.",
+    date: "2025-04-01"
+  },
+  {
+    id: 2,
+    name: "Priya Patel",
+    rating: 4,
+    comment: "Loved the ambiance and the food. The naan bread was particularly good.",
+    date: "2025-03-29"
+  },
+  {
+    id: 3,
+    name: "Arjun Singh",
+    rating: 5,
+    comment: "Best biryani in town! Will definitely be coming back.",
+    date: "2025-03-25"
+  },
+  {
+    id: 4,
+    name: "Meera Krishnan",
+    rating: 3,
+    comment: "Good food but service was a bit slow during peak hours.",
+    date: "2025-03-22"
+  },
+  {
+    id: 5,
+    name: "Vikram Malhotra",
+    rating: 5,
+    comment: "The paneer tikka masala and garlic naan were exceptional. Great vegetarian options!",
+    date: "2025-03-20"
+  }
+];
+
 const Review = () => {
   const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,7 +67,9 @@ const Review = () => {
         const response = await fetch(`${BACKEND_URL}/api/reviews`);
         
         if (!response.ok) {
-          throw new Error(`Failed to fetch reviews: ${response.status}`);
+          setReviews(sampleReviews)
+          return;
+          // throw new Error(`Failed to fetch reviews: ${response.status}`);
         }
         
         const data = await response.json();
@@ -43,45 +84,6 @@ const Review = () => {
       } catch (err) {
         console.error("Error fetching reviews:", err);
         setError("Failed to load reviews. Please try again later.");
-        
-        // Sample reviews for development
-        const sampleReviews = [
-          {
-            id: 1,
-            name: "Rajesh Sharma",
-            rating: 5,
-            comment: "The butter chicken was amazing! Authentic flavors and great service.",
-            date: "2025-04-01"
-          },
-          {
-            id: 2,
-            name: "Priya Patel",
-            rating: 4,
-            comment: "Loved the ambiance and the food. The naan bread was particularly good.",
-            date: "2025-03-29"
-          },
-          {
-            id: 3,
-            name: "Arjun Singh",
-            rating: 5,
-            comment: "Best biryani in town! Will definitely be coming back.",
-            date: "2025-03-25"
-          },
-          {
-            id: 4,
-            name: "Meera Krishnan",
-            rating: 3,
-            comment: "Good food but service was a bit slow during peak hours.",
-            date: "2025-03-22"
-          },
-          {
-            id: 5,
-            name: "Vikram Malhotra",
-            rating: 5,
-            comment: "The paneer tikka masala and garlic naan were exceptional. Great vegetarian options!",
-            date: "2025-03-20"
-          }
-        ];
         
         setReviews(sampleReviews);
         
