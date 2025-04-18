@@ -4,9 +4,6 @@ export const getFeaturedItems = async (setFeaturedItems, setIsLoading) => {
   try {
     setIsLoading(true);
     const res = await axiosInstance.get("/api/menu/featured");
-    if (res.status !== 200) {
-      throw new Error("Failed to fetch featured items");
-    }
     const data = res.data;
     setFeaturedItems(data);
   } catch (error) {

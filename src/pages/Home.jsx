@@ -1,67 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { formatEURO } from "../utils/formatEURO";
-
-const sampleBanners = [
-  {
-    id: 1,
-    image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1200&auto=format&fit=crop",
-    title: "Welcome to Our Restaurant",
-    description: "Experience the finest dining in town"
-  },
-  {
-    id: 2,
-    image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1200&auto=format&fit=crop",
-    title: "Try Our Special Menu",
-    description: "Handcrafted dishes made with premium ingredients"
-  },
-  {
-    id: 3,
-    image: "https://images.unsplash.com/photo-1502301103665-0b95cc738daf?q=80&w=1200&auto=format&fit=crop",
-    title: "Book Your Table",
-    description: "Reserve your spot for a memorable dining experience"
-  }
-]
-
-const sampletFeaturedItems = [
-  {
-    id: 1,
-    name: "Signature Pasta",
-    description: "Homemade pasta with our special sauce",
-    price: 1320, // Price in INR
-    image: "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=500&auto=format&fit=crop"
-  },
-  {
-    id: 2,
-    name: "Grilled Salmon",
-    description: "Fresh salmon with seasonal vegetables",
-    price: 1899, // Price in INR
-    image: "https://images.unsplash.com/photo-1485704686097-ed47f7263ca4?w=500&auto=format&fit=crop"
-  },
-  {
-    id: 3,
-    name: "Classic Burger",
-    description: "Juicy beef patty with all the fixings",
-    price: 1150, // Price in INR
-    image: "https://images.unsplash.com/photo-1565299507177-b0ac66763828?w=500&auto=format&fit=crop"
-  },
-  {
-    id: 4,
-    name: "Chocolate Dessert",
-    description: "Rich chocolate cake with vanilla ice cream",
-    price: 750, // Price in INR
-    image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&auto=format&fit=crop"
-  }
-]
+import { getFeaturedItems } from "../service/menu";
+import { getAllBanners } from "../service/banners";
 
 const Home = () => {
-  const [banners, setBanners] = useState(sampleBanners);
-
-  const [featuredItems, setFeaturedItems] = useState(sampletFeaturedItems);
-
+  const [banners, setBanners] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [featuredItems, setFeaturedItems] = useState([]);
   const [currentBanner, setCurrentBanner] = useState(0);
 
   useEffect(() => {
+    if (banners.length === 0) return;
     const interval = setInterval(() => {
       setCurrentBanner((prevBanner) => (prevBanner + 1) % banners.length);
     }, 5000);
@@ -70,49 +20,93 @@ const Home = () => {
 
 
   useEffect(() => {
-    
-  })
-  
+    const fetchFeaturedItems = async () => {
+      await getFeaturedItems(setFeaturedItems, setIsLoading);
+    }
+    fetchFeaturedItems();
+    return () => {
+      setFeaturedItems([]);
+    }
+  }, [])
+
+  useEffect(() => {
+    const fetchBanners = async () => {
+      await getAllBanners(setBanners, setIsLoading);
+    }
+    fetchBanners();
+    return () => {
+      setBanners([]);
+    }
+  }, [])
+
   return (
     <div className="space-y-12">
-      {/* Banner Carousel */}
+      {/* Banner Carousel with Loading State */}
       <div className="relative h-[500px] overflow-hidden rounded-xl">
-        {banners.map((banner, index) => (
-          <div
-            key={banner.id}
-            className={`absolute top-0 left-0 w-full h-full transition-opacity duration-1000 
-            ${index === currentBanner ? "opacity-100" : "opacity-0"}`}
-          >
-            <img
-              src={banner.image}
-              alt={banner.title}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-              <div className="text-center text-white p-5">
-                <h2 className="text-4xl font-bold mb-4">{banner.title}</h2>
-                <p className="text-xl">{banner.description}</p>
-                <Link to="/reserve">
-                  <button className="mt-6 bg-amber-700 hover:bg-amber-800 text-white font-bold py-2 px-6 rounded-full text-lg transition-colors">
-                    Reserve a Table
-                  </button>
-                </Link>
+        {isLoading ? (
+          // Skeleton loader for banner carousel
+          <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
+            <svg className="w-12 h-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+        ) : banners.length > 0 ? (
+          <>
+            {banners.map((banner, index) => (
+              <div
+                key={banner._id}
+                className={`absolute top-0 left-0 w-full h-full transition-opacity duration-1000 bg-transparent
+    ${index === currentBanner ? "opacity-100" : "opacity-0"}`}
+              >
+                <img
+                  src={banner.image}
+                  alt={banner.title}
+                  className="w-full h-full absolute left-0 top-0 object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1200&auto=format&fit=crop"; // Fallback image
+                  }}
+                />
+                <div className="absolute inset-0 bg-transparent flex items-center justify-center">
+                  <div className="text-center text-white p-5">
+                    <h2 className="text-4xl font-bold mb-4">{banner.title}</h2>
+                    <p className="text-xl">{banner.description}</p>
+                    <Link to="/reserve">
+                      <button className="cursor-pointer mt-6 bg-amber-700 hover:bg-amber-800 text-white font-bold py-2 px-6 rounded-full text-lg transition-colors">
+                        Reserve a Table
+                      </button>
+                    </Link>
+                  </div>
+                </div>
               </div>
+            ))}
+
+            {/* Dots navigation for banners */}
+            <div className="absolute bottom-5 left-0 right-0 flex justify-center">
+              {banners.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentBanner(index)}
+                  className={`h-3 w-3 mx-1 rounded-full ${index === currentBanner ? "bg-white" : "bg-white bg-opacity-50"
+                    }`}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          // Empty state for banners
+          <div className="w-full h-full bg-amber-50 flex items-center justify-center">
+            <div className="text-center p-5">
+              <h2 className="text-2xl font-bold text-amber-900">Welcome to Our Restaurant</h2>
+              <p className="text-lg text-gray-600 mt-2">Discover our exquisite menu and dining experience</p>
+              <Link to="/menu">
+                <button className="mt-6 bg-amber-700 hover:bg-amber-800 text-white font-bold py-2 px-6 rounded-full transition-colors">
+                  Browse Menu
+                </button>
+              </Link>
             </div>
           </div>
-        ))}
-        
-        <div className="absolute bottom-5 left-0 right-0 flex justify-center">
-          {banners.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentBanner(index)}
-              className={`h-3 w-3 mx-1 rounded-full ${
-                index === currentBanner ? "bg-white" : "bg-white bg-opacity-50"
-              }`}
-            />
-          ))}
-        </div>
+        )}
       </div>
 
       {/* Welcome Section */}
@@ -124,33 +118,57 @@ const Home = () => {
             Our chefs use only the freshest ingredients to create memorable meals for our guests.
           </p>
           <Link to="/menu">
-            <button className="bg-amber-700 hover:bg-amber-800 text-white font-bold py-2 px-6 rounded-md transition-colors">
+            <button className="cursor-pointer bg-amber-700 hover:bg-amber-800 text-white font-bold py-2 px-6 rounded-md transition-colors">
               Explore Our Menu
             </button>
           </Link>
         </div>
       </section>
 
-      {/* Featured Items */}
+      {/* Featured Items with Loading State */}
       <section>
         <h2 className="text-3xl font-bold text-amber-900 mb-8 text-center">Featured Menu Items</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredItems.map(item => (
-            <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              <img src={item.image} alt={item.name} className="w-full h-48 object-cover" />
-              <div className="p-4">
-                <h3 className="font-bold text-lg text-amber-900">{item.name}</h3>
-                <p className="text-gray-600 text-sm mb-2">{item.description}</p>
-                <div className="flex justify-between items-center">
-                  <span className="font-bold text-amber-700">{formatEURO(item.price)}</span>
+
+        {isLoading ? (
+          // Skeleton loaders for featured items
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="w-full h-48 bg-gray-200 animate-pulse"></div>
+                <div className="p-4 space-y-2">
+                  <div className="h-5 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : featuredItems.length > 0 ? (
+          // Render featured items when available
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredItems.map(item => (
+              <div key={item._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                <img src={item.image} alt={item.name} className="w-full h-48 object-cover" />
+                <div className="p-4">
+                  <h3 className="font-bold text-lg text-amber-900">{item.name}</h3>
+                  <p className="text-gray-600 text-sm mb-2">{item.description}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-amber-700">{formatEURO(item.price)}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          // Empty state for featured items
+          <div className="text-center p-12 bg-gray-50 rounded-lg">
+            <p className="text-gray-600">No featured items available at the moment.</p>
+          </div>
+        )}
+
         <div className="text-center mt-8">
           <Link to="/menu">
-            <button className="bg-amber-700 hover:bg-amber-800 text-white font-bold py-2 px-6 rounded-md transition-colors">
+            <button className="cursor-pointer bg-amber-700 hover:bg-amber-800 text-white font-bold py-2 px-6 rounded-md transition-colors">
               View Full Menu
             </button>
           </Link>
@@ -162,7 +180,7 @@ const Home = () => {
         <h2 className="text-3xl font-bold mb-4">Make a Reservation</h2>
         <p className="text-xl mb-8">Book your table now for a delightful dining experience</p>
         <Link to="/reserve">
-          <button className="bg-white text-amber-800 hover:bg-amber-100 font-bold py-3 px-8 rounded-full text-lg transition-colors">
+          <button className="cursor-pointer bg-white text-amber-800 hover:bg-amber-100 font-bold py-3 px-8 rounded-full text-lg transition-colors">
             Reserve Now
           </button>
         </Link>
