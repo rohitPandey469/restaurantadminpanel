@@ -28,3 +28,54 @@ export const getMenuItems = async (setMenuItems, setIsLoading) => {
     setIsLoading(false);
   }
 }
+
+export const addMenuItem = async (menuItem, setMessage, setError) => {
+  try {
+    const res = await axiosInstance.post("/api/menu", menuItem);
+    if (res.status !== 201) {
+      throw new Error("Failed to add menu item");
+    }
+    setMessage(res.data.message);
+    setError(null);
+  } catch (error) {
+    console.error("Error adding menu item:", error);
+    setError("Failed to add menu item. Please try again.");
+  }
+}
+
+export const updateMenuItem = async (menuItemId, updatedData, setMessage, setError) => {
+  try {
+    const res = await axiosInstance.put(`/api/menu/${menuItemId}`, updatedData);
+    if(res.status === 404 ){
+      setError("Menu item not found");
+      return;
+    }
+    if (res.status !== 200) {
+      throw new Error("Failed to update menu item");
+    }
+    setMessage(res.data.message);
+    setError(null);
+    return res.data.item;
+  } catch (error) {
+    console.error("Error updating menu item:", error);
+    setError("Failed to update menu item. Please try again.");
+  }
+}
+
+export const deleteMenuItem = async (menuItemId, setMessage, setError) => {
+  try {
+    const res = await axiosInstance.delete(`/api/menu/${menuItemId}`);
+    if(res.status === 404 ){
+      setError("Menu item not found");
+      return;
+    }
+    if (res.status !== 200) {
+      throw new Error("Failed to delete menu item");
+    }
+    setMessage(res.data.message);
+    setError(null);
+  } catch (error) {
+    console.error("Error deleting menu item:", error);
+    setError("Failed to delete menu item. Please try again.");
+  }
+}

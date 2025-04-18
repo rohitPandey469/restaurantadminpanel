@@ -1,60 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { addMenuItem, getMenuItems, updateMenuItem, deleteMenuItem } from "../../service/menu";
+import { formatEURO } from "../../utils/formatEURO";
 
 const AdminMenu = () => {
-  const [menuItems, setMenuItems] = useState([
-    {
-      id: 1,
-      name: "Signature Pasta",
-      description: "Homemade pasta with our special sauce",
-      price: 1320, // Prices in INR
-      category: "Main Course",
-      image: "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=500&auto=format&fit=crop",
-      featured: true
-    },
-    {
-      id: 2,
-      name: "Grilled Salmon",
-      description: "Fresh salmon with seasonal vegetables",
-      price: 1899,
-      category: "Main Course",
-      image: "https://images.unsplash.com/photo-1485704686097-ed47f7263ca4?w=500&auto=format&fit=crop",
-      featured: true
-    },
-    {
-      id: 3,
-      name: "Classic Burger",
-      description: "Juicy beef patty with all the fixings",
-      price: 1150,
-      category: "Main Course",
-      image: "https://images.unsplash.com/photo-1565299507177-b0ac66763828?w=500&auto=format&fit=crop",
-      featured: true
-    },
-    {
-      id: 4,
-      name: "Chocolate Dessert",
-      description: "Rich chocolate cake with vanilla ice cream",
-      price: 750,
-      category: "Dessert",
-      image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&auto=format&fit=crop",
-      featured: true
-    },
-    {
-      id: 5,
-      name: "Caesar Salad",
-      description: "Fresh romaine lettuce with our homemade dressing",
-      price: 830,
-      category: "Starter",
-      image: "https://images.unsplash.com/photo-1551248429-40975aa4de74?w=500&auto=format&fit=crop",
-      featured: false
-    }
-  ]);
-
+  const [menuItems, setMenuItems] = useState([])
+  const [isLoading, setIsLoading] = useState(true);
+  const [message, setMessage] = useState(null);
+  const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
-    id: null,
     name: "",
     description: "",
     price: "",
-    category: "Main Course",
+    category: "main",
     image: "",
     featured: false
   });
@@ -64,15 +21,6 @@ const AdminMenu = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showImagePreview, setShowImagePreview] = useState(false);
 
-  // Format price in INR
-  const formatINR = (price) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
-
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -81,52 +29,57 @@ const AdminMenu = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+    setMessage(null);
     
-    if (editMode) {
-      // Update existing item
-      setMenuItems(menuItems.map(item => 
-        item.id === formData.id ? {...formData, price: parseInt(formData.price)} : item
-      ));
-    } else {
-      // Add new item
-      setMenuItems([...menuItems, {
-        ...formData,
-        id: Date.now(),
-        price: parseInt(formData.price)
-      }]);
+    try {
+      if (editMode) {
+        await updateMenuItem(formData._id, formData, setMessage, setError);
+      } else {
+        await addMenuItem(formData, setMessage, setError);
+      }
+      
+      await getMenuItems(setMenuItems, setIsLoading);
+      setFormData({
+        name: "",
+        description: "",
+        price: "",
+        category: "Main Course",
+        image: "",
+        featured: false
+      });
+      setEditMode(false);
+    } catch (err) {
+      setError(err.message || "An error occurred while saving the menu item");
     }
-    
-    // Reset form
-    setFormData({
-      id: null,
-      name: "",
-      description: "",
-      price: "",
-      category: "Main Course",
-      image: "",
-      featured: false
-    });
-    setEditMode(false);
   };
 
   const handleEdit = (item) => {
     setFormData(item);
     setEditMode(true);
+    setError(null);
+    setMessage(null);
     // Scroll to the form
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this menu item?")) {
-      setMenuItems(menuItems.filter(item => item.id !== id));
+      setError(null);
+      setMessage(null);
+      try {
+        await deleteMenuItem(id, setMessage, setError);
+        await getMenuItems(setMenuItems, setIsLoading);
+      } catch (err) {
+        setError(err.message || "Failed to delete menu item");
+      }
     }
   };
 
   const handleCancel = () => {
     setFormData({
-      id: null,
       name: "",
       description: "",
       price: "",
@@ -135,6 +88,8 @@ const AdminMenu = () => {
       featured: false
     });
     setEditMode(false);
+    setError(null);
+    setMessage(null);
   };
 
   // Get all unique categories for filter
@@ -148,6 +103,21 @@ const AdminMenu = () => {
       item.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+  useEffect(() => {
+    const fetchMenuItems = async () => {
+      try {
+        await getMenuItems(setMenuItems, setIsLoading);
+      } catch (err) {
+        setError("Failed to load menu items");
+        setIsLoading(false);
+      }
+    }
+    fetchMenuItems();
+    return () => {
+      setMenuItems([]);
+    };
+  },[]);
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto p-4">
       <div className="flex justify-between items-center">
@@ -157,7 +127,32 @@ const AdminMenu = () => {
         </p>
       </div>
       
-      {/* Add/Edit Menu Item Form */}
+      {message && (
+        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded relative" role="alert">
+          <span className="block sm:inline">{message}</span>
+          <button 
+            type="button" 
+            className="cursor-pointer absolute top-0 right-0 p-2 focus:outline-none"
+            onClick={() => setMessage(null)}
+          >
+            <span className="text-xl">&times;</span>
+          </button>
+        </div>
+      )}
+      
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded relative" role="alert">
+          <span className="block sm:inline">{error}</span>
+          <button 
+            type="button" 
+            className="cursor-pointer absolute top-0 right-0 p-2 focus:outline-none"
+            onClick={() => setError(null)}
+          >
+            <span className="text-xl">&times;</span>
+          </button>
+        </div>
+      )}
+      
       <div className="bg-white shadow rounded-lg p-6">
         <h2 className="text-lg font-medium mb-4">
           {editMode ? "Edit Menu Item" : "Add New Menu Item"}
@@ -172,7 +167,7 @@ const AdminMenu = () => {
                 value={formData.name}
                 onChange={handleInputChange}
                 required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring focus:ring-amber-500 focus:ring-opacity-50"
+                className="p-2 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring focus:ring-amber-500 focus:ring-opacity-50"
               />
             </div>
             
@@ -184,8 +179,10 @@ const AdminMenu = () => {
                 value={formData.price}
                 onChange={handleInputChange}
                 required
-                placeholder="Enter price in INR"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring focus:ring-amber-500 focus:ring-opacity-50"
+                min="0"
+                step="0.01"
+                placeholder="Enter price in EUR"
+                className="p-2 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring focus:ring-amber-500 focus:ring-opacity-50"
               />
             </div>
             
@@ -195,13 +192,13 @@ const AdminMenu = () => {
                 name="category"
                 value={formData.category}
                 onChange={handleInputChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring focus:ring-amber-500 focus:ring-opacity-50"
+                className="p-2 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring focus:ring-amber-500 focus:ring-opacity-50"
               >
-                <option value="Starter">Starter</option>
-                <option value="Main Course">Main Course</option>
-                <option value="Dessert">Dessert</option>
-                <option value="Beverage">Beverage</option>
-                <option value="Special">Special</option>
+                <option value="starters">Starter</option>
+                <option value="main">Main Course</option>
+                <option value="desserts">Dessert</option>
+                <option value="drinks">Beverage</option>
+                <option value="sides">Special</option>
               </select>
             </div>
             
@@ -214,13 +211,13 @@ const AdminMenu = () => {
                   value={formData.image}
                   onChange={handleInputChange}
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring focus:ring-amber-500 focus:ring-opacity-50"
+                  className="p-2 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring focus:ring-amber-500 focus:ring-opacity-50"
                 />
                 {formData.image && (
                   <button 
                     type="button"
                     onClick={() => setShowImagePreview(!showImagePreview)} 
-                    className="ml-2 mt-1 px-2 py-1 bg-amber-100 text-amber-700 rounded hover:bg-amber-200"
+                    className="cursor-pointer ml-2 mt-1 px-2 py-1 bg-amber-100 text-amber-700 rounded hover:bg-amber-200"
                   >
                     {showImagePreview ? "Hide" : "Preview"}
                   </button>
@@ -232,6 +229,11 @@ const AdminMenu = () => {
                     src={formData.image} 
                     alt="Preview" 
                     className="h-24 w-24 object-cover rounded border border-gray-300"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://via.placeholder.com/150?text=Image+Error";
+                      setError("Failed to load image preview. Please check the URL.");
+                    }}
                   />
                 </div>
               )}
@@ -245,20 +247,21 @@ const AdminMenu = () => {
                 onChange={handleInputChange}
                 required
                 rows={3}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring focus:ring-amber-500 focus:ring-opacity-50"
+                className="p-2 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring focus:ring-amber-500 focus:ring-opacity-50"
               />
             </div>
             
             <div className="flex items-center">
               <input
                 type="checkbox"
+                id="featured"
                 name="featured"
                 checked={formData.featured}
                 onChange={handleInputChange}
                 className="h-4 w-4 text-amber-500 focus:ring-amber-500 border-gray-300 rounded"
               />
-              <label className="ml-2 block text-sm text-gray-700">
-                Featured Item
+              <label htmlFor="featured" className="ml-2 block text-sm text-gray-700">
+                Featured Item | Chef's Choice
               </label>
             </div>
           </div>
@@ -268,14 +271,14 @@ const AdminMenu = () => {
               <button
                 type="button"
                 onClick={handleCancel}
-                className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
+                className="cursor-pointer bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
               >
                 Cancel
               </button>
             )}
             <button
               type="submit"
-              className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700"
+              className="cursor-pointer bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700"
             >
               {editMode ? "Update Item" : "Add Item"}
             </button>
@@ -295,7 +298,7 @@ const AdminMenu = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search menu items..."
-                className="focus:ring-amber-500 focus:border-amber-500 block w-full pr-10 sm:text-sm border-gray-300 rounded-md"
+                className="p-2 focus:ring-amber-500 focus:border-amber-500 block w-full pr-10 sm:text-sm border-gray-300 rounded-md"
               />
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                 <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -307,7 +310,7 @@ const AdminMenu = () => {
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="block w-full sm:w-auto rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring focus:ring-amber-500 focus:ring-opacity-50"
+              className="p-2 block w-full sm:w-auto rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring focus:ring-amber-500 focus:ring-opacity-50"
             >
               {categories.map(category => (
                 <option key={category} value={category}>{category}</option>
@@ -316,7 +319,15 @@ const AdminMenu = () => {
           </div>
         </div>
         
-        {filteredItems.length > 0 ? (
+        {isLoading ? (
+          <div className="py-12 text-center">
+            <svg className="animate-spin h-10 w-10 mx-auto text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p className="mt-3 text-amber-800">Loading menu items...</p>
+          </div>
+        ) : filteredItems.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -330,11 +341,19 @@ const AdminMenu = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredItems.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50">
+                  <tr key={item._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-12 w-12">
-                          <img className="h-12 w-12 rounded object-cover" src={item.image} alt={item.name} />
+                          <img 
+                            className="h-12 w-12 rounded object-cover" 
+                            src={item.image} 
+                            alt={item.name}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = "https://via.placeholder.com/150?text=No+Image";
+                            }} 
+                          />
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{item.name}</div>
@@ -348,7 +367,7 @@ const AdminMenu = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {formatINR(item.price)}
+                      {formatEURO(item.price)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -362,13 +381,13 @@ const AdminMenu = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button 
                         onClick={() => handleEdit(item)}
-                        className="text-amber-600 hover:text-amber-900 mr-3"
+                        className="cursor-pointer text-amber-600 hover:text-amber-900 mr-3"
                       >
                         Edit
                       </button>
                       <button 
-                        onClick={() => handleDelete(item.id)}
-                        className="text-red-600 hover:text-red-900"
+                        onClick={() => handleDelete(item._id)}
+                        className="cursor-pointer text-red-600 hover:text-red-900"
                       >
                         Delete
                       </button>
