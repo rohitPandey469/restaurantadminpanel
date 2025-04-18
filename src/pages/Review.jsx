@@ -1,199 +1,88 @@
 import React, { useState, useEffect } from "react";
-// import { BACKEND_URL } from "../App";
-
-// Sample reviews for development
-const sampleReviews = [
-  {
-    id: 1,
-    name: "Rajesh Sharma",
-    rating: 5,
-    comment: "The butter chicken was amazing! Authentic flavors and great service.",
-    date: "2025-04-01"
-  },
-  {
-    id: 2,
-    name: "Priya Patel",
-    rating: 4,
-    comment: "Loved the ambiance and the food. The naan bread was particularly good.",
-    date: "2025-03-29"
-  },
-  {
-    id: 3,
-    name: "Arjun Singh",
-    rating: 5,
-    comment: "Best biryani in town! Will definitely be coming back.",
-    date: "2025-03-25"
-  },
-  {
-    id: 4,
-    name: "Meera Krishnan",
-    rating: 3,
-    comment: "Good food but service was a bit slow during peak hours.",
-    date: "2025-03-22"
-  },
-  {
-    id: 5,
-    name: "Vikram Malhotra",
-    rating: 5,
-    comment: "The paneer tikka masala and garlic naan were exceptional. Great vegetarian options!",
-    date: "2025-03-20"
-  }
-];
+import { createFeedback, getAllFeedback } from "../service/feedback";
 
 const Review = () => {
   const [reviews, setReviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [mainError, setMainError] = useState(null);
   const [averageRating, setAverageRating] = useState(0);
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     rating: 5,
-    comment: "",
-    date: new Date().toISOString().split('T')[0]
+    message: "",
   });
 
-  const [formError, setFormError] = useState("");
-  const [formSuccess, setFormSuccess] = useState("");
-  const [submitting, setSubmitting] = useState(false);
   const [filterRating, setFilterRating] = useState(0);
 
-  // Fetch reviews on component mount
-  // useEffect(() => {
-  //   const fetchReviews = async () => {
-  //     setIsLoading(true);
-  //     try {
-  //       const response = await fetch(`${BACKEND_URL}/api/reviews`);
-        
-  //       if (!response.ok) {
-  //         setReviews(sampleReviews)
-  //         return;
-  //         // throw new Error(`Failed to fetch reviews: ${response.status}`);
-  //       }
-        
-  //       const data = await response.json();
-  //       setReviews(data);
-        
-  //       // Calculate average rating
-  //       if (data.length > 0) {
-  //         const totalRating = data.reduce((acc, review) => acc + review.rating, 0);
-  //         setAverageRating((totalRating / data.length).toFixed(1));
-  //       }
-        
-  //     } catch (err) {
-  //       console.error("Error fetching reviews:", err);
-  //       setError("Failed to load reviews. Please try again later.");
-        
-  //       setReviews(sampleReviews);
-        
-  //       // Calculate average rating for sample data
-  //       const totalRating = sampleReviews.reduce((acc, review) => acc + review.rating, 0);
-  //       setAverageRating((totalRating / sampleReviews.length).toFixed(1));
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-    
-  //   fetchReviews();
-  // }, []);
+  useEffect(() => {
+    const fetchReviews = async () => {
+      await getAllFeedback(setReviews, setIsLoading, setMainError);
+    }
+    fetchReviews();
+    return () => {
+      setReviews([]);
+    }
+  }, []);
 
-  // Handle input changes for the review form
+  // Calculate average rating whenever reviews change
+  useEffect(() => {
+    if (reviews.length > 0) {
+      const total = reviews.reduce((sum, review) => sum + review.rating, 0);
+      setAverageRating((total / reviews.length).toFixed(1));
+    } else {
+      setAverageRating(0);
+    }
+  }, [reviews.length, reviews]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: name === "rating" ? parseInt(value, 10) : value
+      [name]: name === "rating" ? parseInt(value, 10) : value,
     });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    setFormError("");
-    setFormSuccess("");
+    setError(null);
+    setMessage("");
     
     try {
-      // Validate form
-      if (!formData.name || !formData.email || !formData.comment) {
-        throw new Error("Please fill in all required fields");
+      const newReview = await createFeedback(formData);
+      
+      if (newReview) {
+        await getAllFeedback(setReviews, setIsLoading, setMainError);
+        setMessage("Thank you for your feedback!");
+        setTimeout(() => {
+          setMessage("");
+        }
+        , 5000);
+        setFormData({
+          name: "",
+          email: "",
+          rating: 5,
+          message: "",
+        });
+      } else {
+        setError("Error submitting your review. Please try again.");
       }
-      
-      // Submit review to backend
-      const response = await fetch(`${BACKEND_URL}/api/reviews`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          ...formData,
-          date: new Date().toISOString().split('T')[0]
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to submit review");
-      }
-      
-      const data = await response.json();
-      
-      // Update reviews list with new review
-      setReviews([data, ...reviews]);
-      
-      // Recalculate average rating
-      const totalRating = [...reviews, data].reduce((acc, review) => acc + review.rating, 0);
-      setAverageRating((totalRating / (reviews.length + 1)).toFixed(1));
-      
-      // Reset form
-      setFormData({
-        name: "",
-        email: "",
-        rating: 5,
-        comment: "",
-        date: new Date().toISOString().split('T')[0]
-      });
-      
-      setFormSuccess("Thank you for your review!");
-      
     } catch (err) {
-      console.error("Error submitting review:", err);
-      setFormError(err.message || "Failed to submit review. Please try again.");
-      
-      // For development: add the review locally without API
-      const newReview = {
-        id: reviews.length + 1,
-        ...formData,
-        date: new Date().toISOString().split('T')[0]
-      };
-      
-      setReviews([newReview, ...reviews]);
-      
-      // Recalculate average rating
-      const totalRating = [...reviews, newReview].reduce((acc, review) => acc + review.rating, 0);
-      setAverageRating((totalRating / (reviews.length + 1)).toFixed(1));
-      
-      // Reset form
-      setFormData({
-        name: "",
-        email: "",
-        rating: 5,
-        comment: "",
-        date: new Date().toISOString().split('T')[0]
-      });
-      
-      setFormSuccess("Thank you for your review!");
+      setError("Error submitting your review: " + (err.message || "Unknown error"));
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Filter reviews by rating
   const filteredReviews = filterRating === 0
     ? reviews
     : reviews.filter(review => review.rating === filterRating);
 
-  // Render stars for ratings
   const renderStars = (rating) => {
     return Array(5).fill(0).map((_, i) => (
       <svg 
@@ -239,7 +128,7 @@ const Review = () => {
                 <div className="w-24 flex items-center">
                   <button 
                     onClick={() => setFilterRating(filterRating === rating ? 0 : rating)}
-                    className={`flex items-center ${filterRating === rating ? 'font-bold' : ''}`}
+                    className={`cursor-pointer flex items-center ${filterRating === rating ? 'font-bold' : ''}`}
                   >
                     <span className="mr-2">{rating}</span>
                     <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -264,7 +153,7 @@ const Review = () => {
           <div className="mt-4">
             <button 
               onClick={() => setFilterRating(0)} 
-              className="text-sm text-amber-600 hover:text-amber-800"
+              className="cursor-pointer text-sm text-amber-600 hover:text-amber-800"
             >
               Clear filter
             </button>
@@ -278,15 +167,15 @@ const Review = () => {
           <div className="bg-white rounded-lg shadow-md p-6 sticky top-8">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Write a Review</h3>
             
-            {formSuccess && (
+            {message && (
               <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
-                {formSuccess}
+                {message}
               </div>
             )}
             
-            {formError && (
+            {error && (
               <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-                {formError}
+                {error}
               </div>
             )}
             
@@ -347,13 +236,13 @@ const Review = () => {
               </div>
               
               <div className="mb-4">
-                <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
                   Your Review*
                 </label>
                 <textarea
-                  id="comment"
-                  name="comment"
-                  value={formData.comment}
+                  id="message"
+                  name="message" 
+                  value={formData.message}
                   onChange={handleInputChange}
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-amber-500 focus:border-amber-500"
@@ -364,7 +253,7 @@ const Review = () => {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50"
+                className="cursor-pointer w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 disabled:opacity-50"
               >
                 {submitting ? "Submitting..." : "Submit Review"}
               </button>
@@ -399,9 +288,9 @@ const Review = () => {
                 </div>
               ))}
             </div>
-          ) : error ? (
+          ) : mainError ? (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-              {error}
+              {mainError}
             </div>
           ) : filteredReviews.length === 0 ? (
             <div className="bg-white rounded-lg shadow-md p-6 text-center">
@@ -410,7 +299,7 @@ const Review = () => {
           ) : (
             <div className="space-y-6">
               {filteredReviews.map((review) => (
-                <div key={review.id} className="bg-white rounded-lg shadow-md p-6">
+                <div key={review.id || review._id} className="bg-white rounded-lg shadow-md p-6">
                   <div className="flex items-start justify-between">
                     <div>
                       <h4 className="text-lg font-medium text-gray-900">{review.name}</h4>
@@ -419,7 +308,7 @@ const Review = () => {
                           {renderStars(review.rating)}
                         </div>
                         <span className="ml-2 text-sm text-gray-500">
-                          {new Date(review.date).toLocaleDateString('en-US', {
+                          {new Date(review.createdAt || Date.now()).toLocaleDateString('en-US', {
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric'
@@ -436,14 +325,8 @@ const Review = () => {
                     </div>
                   </div>
                   <div className="mt-4 text-gray-700">
-                    <p>{review.comment}</p>
+                    <p>{review.message}</p>
                   </div>
-                  {review.response && (
-                    <div className="mt-4 pl-4 border-l-4 border-amber-200 bg-amber-50 p-3 rounded">
-                      <h5 className="font-medium text-gray-900">Response from Spice Kingdom</h5>
-                      <p className="mt-1 text-gray-700">{review.response}</p>
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
