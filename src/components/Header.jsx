@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { removeToken } from "../utils/token";
 
-const Header = ({ user, onLogout }) => {
+const Header = ({ authToken, onLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  const isAdmin = user?.role === "admin";
+  const isAdmin = authToken ? true : false
 
   const navigate = useNavigate();
 
@@ -109,17 +110,14 @@ const Header = ({ user, onLogout }) => {
           <div className="hidden md:flex md:items-center">
             <div className="flex items-center space-x-3">
               {
-                !user ?
+                !authToken ?
                   (<button
                     onClick={() => {
-                      localStorage.removeItem("user");
+                      removeToken("authToken");
                       navigate("/login")
                     }}
                     className="bg-amber-100 cursor-pointer text-amber-800 hover:bg-amber-200 px-3 py-2 rounded-md text-sm font-medium transition"
                   >Admin Login</button>) : (<>
-                    <span className="text-sm font-medium text-gray-700">
-                      {user?.name}
-                    </span>
                     <button
                       onClick={onLogout}
                       className="bg-amber-100 cursor-pointer text-amber-800 hover:bg-amber-200 px-3 py-2 rounded-md text-sm font-medium transition"
@@ -251,24 +249,19 @@ const Header = ({ user, onLogout }) => {
           <div className="pt-4 pb-3 border-t border-gray-200">
             <div className="flex items-center px-5">
               <div className="flex-shrink-0">
-                {/* User avatar or initials */}
                 <div className="h-10 w-10 rounded-full bg-amber-200 flex items-center justify-center">
                   <span className="text-amber-800 font-medium">
-                    {user?.name?.charAt(0) || 'U'}
+                    {authToken ? "A" : "U"}
                   </span>
                 </div>
-              </div>
-              <div className="ml-3">
-                <div className="text-base font-medium text-gray-800">{user?.name}</div>
-                <div className="text-sm font-medium text-gray-500">{user?.email}</div>
               </div>
             </div>
             <div className="mt-3 px-2 space-y-1">
               {
-                !user ? (
+                !authToken ? (
                   <button
                     onClick={() => {
-                      localStorage.removeItem("user");
+                      removeToken("authToken");
                       setIsMenuOpen(false);
                       navigate("/login");
                     }}

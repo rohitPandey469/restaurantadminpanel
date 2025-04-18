@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BACKEND_URL } from "../App";
+// import { BACKEND_URL } from "../App";
 
 // Sample reviews for development
 const sampleReviews = [
@@ -60,43 +60,43 @@ const Review = () => {
   const [filterRating, setFilterRating] = useState(0);
 
   // Fetch reviews on component mount
-  useEffect(() => {
-    const fetchReviews = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch(`${BACKEND_URL}/api/reviews`);
+  // useEffect(() => {
+  //   const fetchReviews = async () => {
+  //     setIsLoading(true);
+  //     try {
+  //       const response = await fetch(`${BACKEND_URL}/api/reviews`);
         
-        if (!response.ok) {
-          setReviews(sampleReviews)
-          return;
-          // throw new Error(`Failed to fetch reviews: ${response.status}`);
-        }
+  //       if (!response.ok) {
+  //         setReviews(sampleReviews)
+  //         return;
+  //         // throw new Error(`Failed to fetch reviews: ${response.status}`);
+  //       }
         
-        const data = await response.json();
-        setReviews(data);
+  //       const data = await response.json();
+  //       setReviews(data);
         
-        // Calculate average rating
-        if (data.length > 0) {
-          const totalRating = data.reduce((acc, review) => acc + review.rating, 0);
-          setAverageRating((totalRating / data.length).toFixed(1));
-        }
+  //       // Calculate average rating
+  //       if (data.length > 0) {
+  //         const totalRating = data.reduce((acc, review) => acc + review.rating, 0);
+  //         setAverageRating((totalRating / data.length).toFixed(1));
+  //       }
         
-      } catch (err) {
-        console.error("Error fetching reviews:", err);
-        setError("Failed to load reviews. Please try again later.");
+  //     } catch (err) {
+  //       console.error("Error fetching reviews:", err);
+  //       setError("Failed to load reviews. Please try again later.");
         
-        setReviews(sampleReviews);
+  //       setReviews(sampleReviews);
         
-        // Calculate average rating for sample data
-        const totalRating = sampleReviews.reduce((acc, review) => acc + review.rating, 0);
-        setAverageRating((totalRating / sampleReviews.length).toFixed(1));
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  //       // Calculate average rating for sample data
+  //       const totalRating = sampleReviews.reduce((acc, review) => acc + review.rating, 0);
+  //       setAverageRating((totalRating / sampleReviews.length).toFixed(1));
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
     
-    fetchReviews();
-  }, []);
+  //   fetchReviews();
+  // }, []);
 
   // Handle input changes for the review form
   const handleInputChange = (e) => {

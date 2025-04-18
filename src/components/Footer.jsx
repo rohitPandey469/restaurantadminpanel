@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const Footer = ({user}) => {
+const Footer = ({authToken}) => {
   return (
     <footer className="bg-amber-900 text-amber-50">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
@@ -82,7 +82,7 @@ const Footer = ({user}) => {
                 </li>
               </ul>
             </div>
-            {user && (
+            {authToken && (
               <div>
               <h3 className="text-sm font-semibold text-amber-100 tracking-wider uppercase">Admin</h3>
               <ul className="mt-4 space-y-4">

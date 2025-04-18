@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { BACKEND_URL } from "../../App";
+import { getReservations, updateReservationStatus } from "../../service/reserve";
+import { formatEURO } from "../../utils/formatEURO";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -23,59 +24,10 @@ const AdminDashboard = () => {
     { id: 104, customer: "Deepak Sharma", amount: 67.80, status: "processing", date: "2025-03-31" },
   ]);
   
-// Fetch reservations data from API
 useEffect(() => {
   const fetchReservations = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/reservations/all`);
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch reservations: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      // Process the data and ensure each reservation has a status
-      const processedReservations = data.map(reservation => ({
-        ...reservation,
-        // Set status to "confirmed" if not present
-        status: reservation.status || "confirmed"
-      }));
-      
-      console.log(processedReservations)
-      setRecentReservations(processedReservations);
-      
-      // Update pending reservations count in stats
-      const pendingCount = processedReservations.filter(
-        res => res.status === "pending"
-      ).length;
-      
-      setStats(prevStats => ({
-        ...prevStats,
-        pendingReservations: pendingCount
-      }));
-
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching reservations:", err);
-      setError("Failed to load reservations. Please try again later.");
-
-      // Fallback to sample data if API call fails
-      const sampleReservations = [
-        { id: 1, name: "Amit Kumar", date: "2025-04-01", time: "19:00", guests: 4, status: "confirmed", email: "amit@example.com", phone: "+91 98765-43210" },
-        { id: 2, name: "Priya Sharma", date: "2025-04-02", time: "20:30", guests: 2, status: "pending", email: "priya@example.com", phone: "+91 87654-32109" },
-        { id: 3, name: "Rahul Singh", date: "2025-04-02", time: "18:00", guests: 6, status: "confirmed", email: "rahul@example.com", phone: "+91 76543-21098" },
-        { id: 4, name: "Neha Patel", date: "2025-04-03", time: "19:30", guests: 3, status: "pending", email: "neha@example.com", phone: "+91 65432-10987" },
-        { id: 5, name: "Karan Malhotra", date: "2025-04-01", time: "18:30", guests: 2, status: "confirmed", email: "karan@example.com", phone: "+91 54321-09876" },
-        { id: 6, name: "Ananya Gupta", date: "2025-04-03", time: "20:00", guests: 5, status: "confirmed", email: "ananya@example.com", phone: "+91 43210-98765" },
-      ];
-      setRecentReservations(sampleReservations);
-    } finally {
-      setIsLoading(false);
-    }
+    await getReservations(setRecentReservations, setIsLoading);
   };
-
   fetchReservations();
 }, []);
 
@@ -112,23 +64,30 @@ const filteredReservations = recentReservations.filter(reservation => {
   const reservationDates = [...new Set(recentReservations.map(res => res.date))].sort();
   
   // Handle reservation status change
-  const handleStatusChange = (id, newStatus) => {
+  const handleStatusChange = async (reservationId, newStatus) => {
+    const isStatusUpdated = await updateReservationStatus(reservationId, newStatus, setIsLoading, setError);
+    if(!isStatusUpdated) return;
     setRecentReservations(prev => 
-      prev.map(res => res.id === id ? {...res, status: newStatus} : res)
+      prev.map(res => 
+        res.id === reservationId ? { ...res, status: newStatus } : res
+      )
     );
   };
 
-  // Helper function to format currency in INR
-  const formatINR = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0,
-    }).format(amount * 83); // Approximate USD to INR conversion
-  };
-
   return (
-    <div className="space-y-6 p-6 max-w-7xl mx-auto">
+    <div className="relative space-y-6 p-6 max-w-7xl mx-auto">
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Error!</strong>
+          <span className="block sm:inline"> {error}</span>
+          <span className="absolute top-0 bottom-0 right-0 px-4 py-3">
+            <svg className="fill-current h-6 w-6 text-red-500" role="button" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" onClick={() => setError(null)}>
+              <title>Close</title>
+              <path d="M10 9l-5 5m0-5l5 5m0-5l5-5m-5 5l5 5m-5-5l-5 5" />
+            </svg>
+          </span>
+        </div>
+      )}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
         <div className="text-sm text-gray-500">
@@ -192,7 +151,7 @@ const filteredReservations = recentReservations.filter(reservation => {
           <div className="flex justify-between items-center">
             <div>
               <p className="text-sm text-gray-500 font-medium">Revenue</p>
-              <p className="text-2xl font-bold text-gray-800">{formatINR(stats.revenue)}</p>
+              <p className="text-2xl font-bold text-gray-800">{formatEURO(stats.revenue)}</p>
               <p className="text-xs text-green-600 mt-1">↑ 8% from last month</p>
             </div>
             <div className="bg-purple-100 p-3 rounded-full">
@@ -401,7 +360,7 @@ const filteredReservations = recentReservations.filter(reservation => {
                     <div className="text-sm text-gray-900">{order.customer}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{formatINR(order.amount)}</div>
+                    <div className="text-sm font-medium text-gray-900">{formatEURO(order.amount)}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">

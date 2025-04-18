@@ -11,48 +11,28 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import Login from "./pages/Login";
 import Review from "./pages/Review";
 import ComingSoon from "./pages/ComingSoon";
+import { getToken } from "./utils/token";
 
-export const BACKEND_URL = "https://rest-backend-czin.onrender.com";
-
-// Protection for admin routes
 const AdminRoute = ({ children }) => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  return user?.role === "admin" ? children : <Navigate to="/" />;
+  const authToken = getToken("authToken");
+  return authToken ? children : <Navigate to="/" />;
 };
 
-// // Protection for authenticated routes
-// const ProtectedRoute = ({ children }) => {
-//   const user = JSON.parse(localStorage.getItem("user"));
-//   return user ? children : <Navigate to="/login" />;
-// };
-
 export default function App() {
-  const [user, setUser] = useState(null);
+  const [authToken, setAuthToken] = useState(null);
 
   useEffect(() => {
-    // Check if user is logged in
-    const loggedInUser = localStorage.getItem("user");
-    if (loggedInUser) {
-      setUser(JSON.parse(loggedInUser));
-    }
+    const authToken = getToken("authToken")
+    setAuthToken(authToken);
   }, []);
 
   return (
     <Router>
       <Routes>
-        {/* Login Route - accessible to everyone */}
         <Route path="/login" element={
-          user ? <Navigate to="/" /> : <Login />
+          authToken ? <Navigate to="/" /> : <Login />
         } />
-
-        {/* Protected Routes - require authentication */}
-        <Route path="/" element={
-          // <ProtectedRoute>
-            <Layout>
-              <Outlet />
-            </Layout>
-          // </ProtectedRoute>
-        }>
+        <Route path="/" element={<Layout><Outlet/></Layout>}>
           <Route index element={<Home />} />
           <Route path="menu" element={<Menu />} />
           <Route path="reserve" element={<Reservations />} />

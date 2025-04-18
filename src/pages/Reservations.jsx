@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { BACKEND_URL } from "../App";
+import { reservationSchema, validateField, validateForm } from "../utils/validationSchemas";
+import { createReservation } from "../service/reserve";
 
 const Reservations = () => {
   const [formData, setFormData] = useState({
@@ -13,12 +14,30 @@ const Reservations = () => {
     specialRequests: ""
   });
   
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState(null);
   
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear error when field is edited
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+  
+  const handleBlur = async (e) => {
+    const { name, value } = e.target;
+    setTouched(prev => ({ ...prev, [name]: true }));
+    
+    // Validate field on blur
+    const result = await validateField(reservationSchema, name, value);
+    if (!result.valid) {
+      setErrors(prev => ({ ...prev, [name]: result.error }));
+    }
   };
   
   const handleSubmit = async (e) => {
@@ -26,47 +45,22 @@ const Reservations = () => {
     setIsSubmitting(true);
     setSubmitMessage(null);
     
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/reservations/book`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to submit reservation');
-      }
-      
-      setSubmitMessage({
-        type: "success",
-        text: "Reservation request submitted! We'll confirm your booking shortly."
-      });
-      
-      // Reset form after successful submission
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        date: "",
-        time: "",
-        guests: 2,
-        occasion: "",
-        specialRequests: ""
-      });
-      
-    } catch (error) {
-      console.error('Reservation error:', error);
-      setSubmitMessage({
-        type: "error",
-        text: error.message || "Something went wrong. Please try again or contact us directly."
-      });
-    } finally {
+    // Mark all fields as touched
+    const allTouched = {};
+    Object.keys(formData).forEach(key => {
+      allTouched[key] = true;
+    });
+    setTouched(allTouched);
+    
+    // Validate entire form
+    const validationResult = await validateForm(reservationSchema, formData);
+    if (!validationResult.valid) {
+      setErrors(validationResult.errors);
       setIsSubmitting(false);
+      return;
     }
+    
+    await createReservation(formData, setFormData, setErrors, setTouched, setSubmitMessage, setIsSubmitting);
   };
   
   // Get tomorrow's date as the minimum date for reservation
@@ -140,10 +134,14 @@ const Reservations = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       required
                       placeholder="John Doe"
-                      className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-amber-500 focus:border-amber-500"
+                      className={`block w-full border ${errors.name && touched.name ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:ring-amber-500 focus:border-amber-500`}
                     />
+                    {errors.name && touched.name && (
+                      <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                    )}
                   </div>
                   
                   <div>
@@ -156,10 +154,14 @@ const Reservations = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       required
                       placeholder="john@example.com"
-                      className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-amber-500 focus:border-amber-500"
+                      className={`block w-full border ${errors.email && touched.email ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:ring-amber-500 focus:border-amber-500`}
                     />
+                    {errors.email && touched.email && (
+                      <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                    )}
                   </div>
                 </div>
                 
@@ -174,10 +176,14 @@ const Reservations = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       required
                       placeholder="+1 (555) 123-4567"
-                      className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-amber-500 focus:border-amber-500"
+                      className={`block w-full border ${errors.phone && touched.phone ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:ring-amber-500 focus:border-amber-500`}
                     />
+                    {errors.phone && touched.phone && (
+                      <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                    )}
                   </div>
                   
                   <div>
@@ -189,14 +195,18 @@ const Reservations = () => {
                       name="guests"
                       value={formData.guests}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       required
-                      className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-amber-500 focus:border-amber-500"
+                      className={`block w-full border ${errors.guests && touched.guests ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:ring-amber-500 focus:border-amber-500`}
                     >
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
                         <option key={num} value={num}>{num} {num === 1 ? 'person' : 'people'}</option>
                       ))}
                       <option value="11">More than 10 (We'll contact you)</option>
                     </select>
+                    {errors.guests && touched.guests && (
+                      <p className="mt-1 text-sm text-red-600">{errors.guests}</p>
+                    )}
                   </div>
                 </div>
                 
@@ -211,10 +221,14 @@ const Reservations = () => {
                       name="date"
                       value={formData.date}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       required
                       min={minDate}
-                      className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-amber-500 focus:border-amber-500"
+                      className={`block w-full border ${errors.date && touched.date ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:ring-amber-500 focus:border-amber-500`}
                     />
+                    {errors.date && touched.date && (
+                      <p className="mt-1 text-sm text-red-600">{errors.date}</p>
+                    )}
                   </div>
                   
                   <div>
@@ -226,8 +240,9 @@ const Reservations = () => {
                       name="time"
                       value={formData.time}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       required
-                      className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-amber-500 focus:border-amber-500"
+                      className={`block w-full border ${errors.time && touched.time ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:ring-amber-500 focus:border-amber-500`}
                     >
                       <option value="">Select a time</option>
                       {timeSlots.map(time => (
@@ -239,6 +254,9 @@ const Reservations = () => {
                         </option>
                       ))}
                     </select>
+                    {errors.time && touched.time && (
+                      <p className="mt-1 text-sm text-red-600">{errors.time}</p>
+                    )}
                   </div>
                 </div>
                 
@@ -251,12 +269,16 @@ const Reservations = () => {
                     name="occasion"
                     value={formData.occasion}
                     onChange={handleChange}
-                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-amber-500 focus:border-amber-500"
+                    onBlur={handleBlur}
+                    className={`block w-full border ${errors.occasion && touched.occasion ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:ring-amber-500 focus:border-amber-500`}
                   >
                     {occasions.map(occasion => (
                       <option key={occasion} value={occasion}>{occasion}</option>
                     ))}
                   </select>
+                  {errors.occasion && touched.occasion && (
+                    <p className="mt-1 text-sm text-red-600">{errors.occasion}</p>
+                  )}
                 </div>
                 
                 <div>
@@ -268,10 +290,14 @@ const Reservations = () => {
                     name="specialRequests"
                     value={formData.specialRequests}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     rows="4"
                     placeholder="Let us know if you have any specific requests or dietary restrictions..."
-                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-amber-500 focus:border-amber-500"
+                    className={`block w-full border ${errors.specialRequests && touched.specialRequests ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm py-2 px-3 focus:ring-amber-500 focus:border-amber-500`}
                   />
+                  {errors.specialRequests && touched.specialRequests && (
+                    <p className="mt-1 text-sm text-red-600">{errors.specialRequests}</p>
+                  )}
                 </div>
                 
                 <div className="pt-2">
@@ -326,9 +352,8 @@ const Reservations = () => {
               <h3 className="text-lg font-medium text-gray-900">Location</h3>
             </div>
             <div className="text-gray-600 space-y-2">
-              <p>123 Culinary Avenue</p>
-              <p>Gourmet District</p>
-              <p>City, State 12345</p>
+            <p>Lützowstraße 81,</p>
+            <p>10785 Berlin</p>
               <p className="mt-2">
                 <a href="#" className="text-amber-700 hover:text-amber-800 font-medium">
                   View on Map →

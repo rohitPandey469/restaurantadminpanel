@@ -1,58 +1,63 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { formatEURO } from "../utils/formatEURO";
+
+const sampleBanners = [
+  {
+    id: 1,
+    image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1200&auto=format&fit=crop",
+    title: "Welcome to Our Restaurant",
+    description: "Experience the finest dining in town"
+  },
+  {
+    id: 2,
+    image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1200&auto=format&fit=crop",
+    title: "Try Our Special Menu",
+    description: "Handcrafted dishes made with premium ingredients"
+  },
+  {
+    id: 3,
+    image: "https://images.unsplash.com/photo-1502301103665-0b95cc738daf?q=80&w=1200&auto=format&fit=crop",
+    title: "Book Your Table",
+    description: "Reserve your spot for a memorable dining experience"
+  }
+]
+
+const sampletFeaturedItems = [
+  {
+    id: 1,
+    name: "Signature Pasta",
+    description: "Homemade pasta with our special sauce",
+    price: 1320, // Price in INR
+    image: "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=500&auto=format&fit=crop"
+  },
+  {
+    id: 2,
+    name: "Grilled Salmon",
+    description: "Fresh salmon with seasonal vegetables",
+    price: 1899, // Price in INR
+    image: "https://images.unsplash.com/photo-1485704686097-ed47f7263ca4?w=500&auto=format&fit=crop"
+  },
+  {
+    id: 3,
+    name: "Classic Burger",
+    description: "Juicy beef patty with all the fixings",
+    price: 1150, // Price in INR
+    image: "https://images.unsplash.com/photo-1565299507177-b0ac66763828?w=500&auto=format&fit=crop"
+  },
+  {
+    id: 4,
+    name: "Chocolate Dessert",
+    description: "Rich chocolate cake with vanilla ice cream",
+    price: 750, // Price in INR
+    image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&auto=format&fit=crop"
+  }
+]
 
 const Home = () => {
-  const [banners, setBanners] = useState([
-    {
-      id: 1,
-      image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1200&auto=format&fit=crop",
-      title: "Welcome to Our Restaurant",
-      description: "Experience the finest dining in town"
-    },
-    {
-      id: 2,
-      image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=1200&auto=format&fit=crop",
-      title: "Try Our Special Menu",
-      description: "Handcrafted dishes made with premium ingredients"
-    },
-    {
-      id: 3,
-      image: "https://images.unsplash.com/photo-1502301103665-0b95cc738daf?q=80&w=1200&auto=format&fit=crop",
-      title: "Book Your Table",
-      description: "Reserve your spot for a memorable dining experience"
-    }
-  ]);
+  const [banners, setBanners] = useState(sampleBanners);
 
-  const [featuredItems, setFeaturedItems] = useState([
-    {
-      id: 1,
-      name: "Signature Pasta",
-      description: "Homemade pasta with our special sauce",
-      price: 1320, // Price in INR
-      image: "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=500&auto=format&fit=crop"
-    },
-    {
-      id: 2,
-      name: "Grilled Salmon",
-      description: "Fresh salmon with seasonal vegetables",
-      price: 1899, // Price in INR
-      image: "https://images.unsplash.com/photo-1485704686097-ed47f7263ca4?w=500&auto=format&fit=crop"
-    },
-    {
-      id: 3,
-      name: "Classic Burger",
-      description: "Juicy beef patty with all the fixings",
-      price: 1150, // Price in INR
-      image: "https://images.unsplash.com/photo-1565299507177-b0ac66763828?w=500&auto=format&fit=crop"
-    },
-    {
-      id: 4,
-      name: "Chocolate Dessert",
-      description: "Rich chocolate cake with vanilla ice cream",
-      price: 750, // Price in INR
-      image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&auto=format&fit=crop"
-    }
-  ]);
+  const [featuredItems, setFeaturedItems] = useState(sampletFeaturedItems);
 
   const [currentBanner, setCurrentBanner] = useState(0);
 
@@ -63,25 +68,11 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [banners.length]);
 
-  // Format price in INR
-  const formatINR = (price) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
 
-    // Format price to Euro
-    const formatEURO = (price) => {
-      return new Intl.NumberFormat('de-DE', {
-        style: 'currency',
-        currency: 'EUR',
-        maximumFractionDigits: 0
-      }).format(price);
-    }
+  useEffect(() => {
     
-
+  })
+  
   return (
     <div className="space-y-12">
       {/* Banner Carousel */}
@@ -152,9 +143,6 @@ const Home = () => {
                 <p className="text-gray-600 text-sm mb-2">{item.description}</p>
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-amber-700">{formatEURO(item.price)}</span>
-                  <button className="text-sm bg-amber-100 hover:bg-amber-200 text-amber-800 font-semibold py-1 px-3 rounded transition-colors">
-                    Add to Order
-                  </button>
                 </div>
               </div>
             </div>
