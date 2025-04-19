@@ -41,10 +41,11 @@ export const createReservation = async (formData, setFormData, setErrors, setTou
 }
 
 // For admin
-export const getReservations = async (setReservations, setIsLoading) => {
+export const getReservations = async (lastNumHours, status, setReservations, setIsLoading) => {
+  lastNumHours = parseInt(lastNumHours);
   setIsLoading(true);
   try{
-    const res = await axiosInstance.get("/api/reservations/all");
+    const res = await axiosInstance.get("/api/reservations/all", { params : { lastNumHours, status } });
     setReservations(res.data);
   }catch (error) {
     console.error('Error fetching reservations:', error);

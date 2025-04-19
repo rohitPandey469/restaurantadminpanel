@@ -257,7 +257,7 @@ const AdminBanners = () => {
         </div>
       ) : banners.length > 0 ? (
         banners.map((banner) => (
-          <div key={banner.id} className="bg-white shadow rounded-lg overflow-hidden">
+          <div key={banner._id} className="bg-white shadow rounded-lg overflow-hidden">
             <div className="relative">
               <img
                 src={banner.image}
