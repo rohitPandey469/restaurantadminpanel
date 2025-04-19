@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const Footer = ({authToken}) => {
+const Footer = ({ authToken }) => {
   return (
     <footer className="bg-amber-900 text-amber-50">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
@@ -12,7 +12,7 @@ const Footer = ({authToken}) => {
               <p className="mt-2 text-sm text-amber-200">South Indian Cuisine</p>
             </div>
             <p className="text-amber-200 text-base leading-6">
-            Experience the rich heritage of South India with authentic delicacies like dosa, idly, and more — crafted from traditional recipes passed down through generations.
+              Experience the rich heritage of South India with authentic delicacies like dosa, idly, and more — crafted from traditional recipes passed down through generations.
             </p>
             <div className="flex space-x-6">
               <a href="#" className="text-amber-300 hover:text-white transition-colors">
@@ -33,12 +33,12 @@ const Footer = ({authToken}) => {
               </a>
             </div>
           </div>
-          <div style={{width:"100%", display:"flex", flexDirection:"row", justifyContent:"space-between"}} className="mt-12">
+          <div style={{ width: "100%", display: "flex", flexDirection: "row", justifyContent: "space-between" }} className="mt-12">
             <div>
               <h3 className="text-sm font-semibold text-amber-100 tracking-wider uppercase">Navigation</h3>
               <ul className="mt-4 space-y-4">
                 <li>
-                  <Link onClick={()=>{
+                  <Link onClick={() => {
                     window.scrollTo(0, 0);
                   }} to="/" className="text-base text-amber-200 hover:text-white transition-colors">
                     Home
@@ -46,37 +46,37 @@ const Footer = ({authToken}) => {
                 </li>
                 <li>
                   <Link
-                  onClick={()=>{
-                    window.scrollTo(0, 0);
-                  }}
-                  to="/menu" className="text-base text-amber-200 hover:text-white transition-colors">
+                    onClick={() => {
+                      window.scrollTo(0, 0);
+                    }}
+                    to="/menu" className="text-base text-amber-200 hover:text-white transition-colors">
                     Menu
                   </Link>
                 </li>
                 <li>
                   <Link
-                  onClick={()=>{
-                    window.scrollTo(0, 0);
-                  }}
-                  to="/reserve" className="text-base text-amber-200 hover:text-white transition-colors">
+                    onClick={() => {
+                      window.scrollTo(0, 0);
+                    }}
+                    to="/reserve" className="text-base text-amber-200 hover:text-white transition-colors">
                     Reservations
                   </Link>
                 </li>
                 <li>
                   <Link
-                  onClick={()=>{
-                    window.scrollTo(0, 0);
-                  }}
-                  to="/review" className="text-base text-amber-200 hover:text-white transition-colors">
+                    onClick={() => {
+                      window.scrollTo(0, 0);
+                    }}
+                    to="/review" className="text-base text-amber-200 hover:text-white transition-colors">
                     Review
                   </Link>
                 </li>
                 <li>
                   <Link
-                  onClick={()=>{
-                    window.scrollTo(0, 0);
-                  }}
-                  to="/coming-soon" className="text-base text-amber-200 hover:text-white transition-colors">
+                    onClick={() => {
+                      window.scrollTo(0, 0);
+                    }}
+                    to="/coming-soon" className="text-base text-amber-200 hover:text-white transition-colors">
                     Coming Soon
                   </Link>
                 </li>
@@ -84,37 +84,37 @@ const Footer = ({authToken}) => {
             </div>
             {authToken && (
               <div>
-              <h3 className="text-sm font-semibold text-amber-100 tracking-wider uppercase">Admin</h3>
-              <ul className="mt-4 space-y-4">
-                <li>
-                  <Link
-                  onClick={()=>{
-                    window.scrollTo(0, 0);
-                  }}
-                  to="/admin/dashboard" className="text-base text-amber-200 hover:text-white transition-colors">
-                    Dashboard
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                  onClick={()=>{
-                    window.scrollTo(0, 0);
-                  }}
-                  to="/admin/menu" className="text-base text-amber-200 hover:text-white transition-colors">
-                    Menu Management
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                  onClick={()=>{
-                    window.scrollTo(0, 0);
-                  }}
-                  to="/admin/banners" className="text-base text-amber-200 hover:text-white transition-colors">
-                    Banner Management
-                  </Link>
-                </li>
-              </ul>
-            </div>
+                <h3 className="text-sm font-semibold text-amber-100 tracking-wider uppercase">Admin</h3>
+                <ul className="mt-4 space-y-4">
+                  <li>
+                    <Link
+                      onClick={() => {
+                        window.scrollTo(0, 0);
+                      }}
+                      to="/admin/dashboard" className="text-base text-amber-200 hover:text-white transition-colors">
+                      Dashboard
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      onClick={() => {
+                        window.scrollTo(0, 0);
+                      }}
+                      to="/admin/menu" className="text-base text-amber-200 hover:text-white transition-colors">
+                      Menu Management
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      onClick={() => {
+                        window.scrollTo(0, 0);
+                      }}
+                      to="/admin/banners" className="text-base text-amber-200 hover:text-white transition-colors">
+                      Banner Management
+                    </Link>
+                  </li>
+                </ul>
+              </div>
             )}
             <div>
               <h3 className="text-sm font-semibold text-amber-100 tracking-wider uppercase">Contact</h3>
@@ -152,6 +152,12 @@ const Footer = ({authToken}) => {
         </div>
         <div className="mt-12 border-t border-amber-800 pt-8">
           <p className="text-base text-amber-300 text-center">&copy; 2025 Benne Berlin. All rights reserved.</p>
+          <p className="text-xs italic text-amber-300 text-center mt-2 flex items-center justify-center">
+            Developed with
+            <svg className="h-4 w-4 ml-1 mx-0 text-red-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+            </svg>by<Link to="https://www.linkedin.com/in/rohit-pandey-2500b6215"><span className="font-medium ml-1">Rohit</span></Link>
+          </p>
         </div>
       </div>
     </footer>
