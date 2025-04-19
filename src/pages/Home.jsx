@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { formatEURO } from "../utils/formatEURO";
 import { getFeaturedItems } from "../service/menu";
-import { getAllBanners } from "../service/banners";
+import { getActiveBanners } from "../service/banners";
 
 const Home = () => {
   const [banners, setBanners] = useState([]);
@@ -31,7 +31,7 @@ const Home = () => {
 
   useEffect(() => {
     const fetchBanners = async () => {
-      await getAllBanners(setBanners, setIsLoading);
+      await getActiveBanners(setBanners, setIsLoading);
     }
     fetchBanners();
     return () => {

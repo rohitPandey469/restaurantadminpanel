@@ -16,52 +16,87 @@ export const getAllBanners = async (setBanners, setIsLoading) => {
   }
 }
 
-export const createBanner = async (bannerData, setBanners, setIsLoading) => {
+export const getActiveBanners = async (setActiveBanners, setIsLoading) => {
   try {
     setIsLoading(true);
+    const res = await axiosInstance.get("/api/banners/active");
+    if (res.status !== 200) {
+      throw new Error("Failed to fetch active banners");
+    }
+    const data = res.data;
+    setActiveBanners(data);
+  } catch (error) {
+    console.error("Error fetching active banners:", error);
+  } finally {
+    setIsLoading(false);
+  }
+}
+
+export const createBanner = async (bannerData, setMessage, setError) => {
+  try {
     const res = await axiosInstance.post("/api/banners", bannerData);
     if (res.status !== 201) {
       throw new Error("Failed to create banner");
     }
-    const newBanner = res.data;
-    setBanners((prevBanners) => [...prevBanners, newBanner]);
+    setMessage(res.data.message);
+    setError(null);
   } catch (error) {
     console.error("Error creating banner:", error);
-  } finally {
-    setIsLoading(false);
+    setError("Failed to create banner. Please try again.");
   }
 }
 
-export const updateBanner = async (bannerId, updatedData, setBanners, setIsLoading) => {
+export const updateBanner = async (bannerId, updatedData, setMessage, setError) => {
   try {
-    setIsLoading(true);
     const res = await axiosInstance.put(`/api/banners/${bannerId}`, updatedData);
+    if(res.status === 404 ){
+      setError("Banner not found");
+      return;
+    }
     if (res.status !== 200) {
       throw new Error("Failed to update banner");
     }
-    const updatedBanner = res.data;
-    setBanners((prevBanners) =>
-      prevBanners.map((banner) => (banner.id === bannerId ? updatedBanner : banner))
-    );
+    setMessage(res.data.message);
+    setError(null);
   } catch (error) {
     console.error("Error updating banner:", error);
-  } finally {
-    setIsLoading(false);
+    setError("Failed to update banner. Please try again.");
   }
 }
 
-export const deleteBanner = async (bannerId, setBanners, setIsLoading) => {
+export const deleteBanner = async (bannerId, setMessage, setError) => {
   try {
-    setIsLoading(true);
     const res = await axiosInstance.delete(`/api/banners/${bannerId}`);
+    if(res.status === 404 ){
+      setError("Banner not found");
+      return;
+    }
     if (res.status !== 200) {
       throw new Error("Failed to delete banner");
     }
-    setBanners((prevBanners) => prevBanners.filter((banner) => banner.id !== bannerId));
+    setMessage(res.data.message);
+    setError(null);
   } catch (error) {
     console.error("Error deleting banner:", error);
-  } finally {
-    setIsLoading(false);
+    setError("Failed to delete banner. Please try again.");
+  }
+}
+
+export const toggleBannerState = async (bannerId, setMessage, setError) => {
+  try {
+    const res = await axiosInstance.patch(`/api/banners/toggle/${bannerId}`);
+    if(res.status === 404 ){
+      setError("Banner not found");
+      return;
+    }
+    if (res.status !== 200) {
+      throw new Error("Failed to toggle banner state");
+    }
+    setMessage(res.data.message);
+    setError(null);
+  } catch (error) {
+    console.error("Error toggling banner state:", error);
+    setError("Failed to toggle banner state. Please try again.");
   }
 }
 
