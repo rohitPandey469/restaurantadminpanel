@@ -55,7 +55,6 @@ export const getReservations = async (lastNumHours, status, setReservations, set
   }
 }
 
-export const updateReservation = async (reservationId, formData, setFormData, setErrors, setTouched, setSubmitMessage, setIsSubmitting) => {}
 
 export const updateReservationStatus = async (reservationId, status, setIsLoading, setError) => {
   setIsLoading(true);
@@ -73,6 +72,24 @@ export const updateReservationStatus = async (reservationId, status, setIsLoadin
     console.error('Error updating reservation status:', error);
     setError(error || "Something went wrong. Please try again or contact us directly.");
     return false;
+  }
+  finally {
+    setIsLoading(false)
+  }
+}
+
+
+export const deleteReservation = async (hours, setSuccess, setIsLoading, setError) => {
+  setIsLoading(true);
+  try{
+    const res = await axiosInstance.delete(`/api/reservations/delete`, { params : { hours } });
+    if(res.status == 400 || res.status == 404){
+      throw new Error(res.data.error);
+    }
+    setSuccess(res.data.message);
+  } catch (error) {
+    console.error('Error deleting reservation:', error);
+    setSuccess(res.data.error);
   }
   finally {
     setIsLoading(false)

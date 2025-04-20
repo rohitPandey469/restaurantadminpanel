@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { getReservations, updateReservationStatus } from "../../service/reserve";
+import { deleteReservation, getReservations, updateReservationStatus } from "../../service/reserve";
 import { formatEURO } from "../../utils/formatEURO";
 import { getAllOrders, getOrderInfo, placeOrder, updateOrderStatus } from "../../service/orders";
 import { getAvailableMenuItems } from "../../service/menu";
@@ -19,6 +19,9 @@ const AdminDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
+  const [hoursToDelete, setHoursToDelete] = useState(48);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteSuccess, setDeleteSuccess] = useState(null);
 
   useEffect(() => {
     const fetchReservations = async () => {
@@ -229,6 +232,21 @@ const AdminDashboard = () => {
     setError(null);
     await getAllOrders(setRecentOrders, setIsLoading);
   }
+
+  const handleDeleteReservationData = async () => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete all reservation data older than ${hoursToDelete} hours? This action cannot be undone.`
+    );
+
+    if (!confirmDelete) return;
+
+    setIsDeleting(true);
+    setError(null);
+    setDeleteSuccess(null);
+
+    await deleteReservation(hoursToDelete, setDeleteSuccess, setIsDeleting, setError);
+    await getReservations(lastNumHours, status, setRecentReservations, setIsLoading);
+  };
 
   return (
     <div className="relative space-y-6 p-6 max-w-7xl mx-auto">
@@ -878,6 +896,66 @@ const AdminDashboard = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Data Management Section */}
+      <div className="bg-white p-6 rounded-lg shadow-md mt-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-medium text-gray-800">Database Maintenance</h2>
+        </div>
+
+        <div className="border-t border-gray-200 pt-4">
+          <h3 className="text-md font-medium text-gray-700 mb-3">Delete Old Reservation Data</h3>
+
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+            <div className="w-full md:w-auto">
+              <label htmlFor="hoursToDelete" className="block text-sm font-medium text-gray-700 mb-1">
+                Delete reservations older than (hours):
+              </label>
+              <input
+                type="number"
+                id="hoursToDelete"
+                min="1"
+                value={hoursToDelete}
+                onChange={(e) => setHoursToDelete(Math.max(1, parseInt(e.target.value) || 1))}
+                className="p-1 block w-full md:w-auto rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring focus:ring-amber-500 focus:ring-opacity-50"
+              />
+            </div>
+
+            <button
+              onClick={handleDeleteReservationData}
+              disabled={isDeleting}
+              className="mt-0 md:mt-5 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+            >
+              {isDeleting ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Deleting...
+                </span>
+              ) : "Delete Old Reservations"}
+            </button>
+          </div>
+
+          {deleteSuccess && (
+            <div className="mt-3 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded relative" role="alert">
+              <span className="block sm:inline">{deleteSuccess}</span>
+              <button
+                type="button"
+                className="absolute top-0 right-0 p-2 focus:outline-none"
+                onClick={() => setDeleteSuccess(null)}
+              >
+                <span className="text-xl">&times;</span>
+              </button>
+            </div>
+          )}
+
+          <p className="mt-2 text-sm text-gray-500">
+            This will permanently delete all reservation data older than the specified number of hours. This action cannot be undone.
+          </p>
         </div>
       </div>
     </div>
