@@ -11,6 +11,7 @@ const Layout = ({ children }) => {
   const handleLogout = () => {
     removeToken("authToken");
     navigate("/");
+    window.location.reload();
   };
 
   return (
