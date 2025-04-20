@@ -13,7 +13,7 @@ export const getFeaturedItems = async (setFeaturedItems, setIsLoading) => {
   }
 }
 
-export const getMenuItems = async (setMenuItems, setIsLoading) => {
+export const getAllMenuItems = async (setMenuItems, setIsLoading) => {
   try {
     setIsLoading(true);
     const res = await axiosInstance.get("/api/menu");
@@ -24,6 +24,40 @@ export const getMenuItems = async (setMenuItems, setIsLoading) => {
     setMenuItems(data);
   } catch (error) {
     console.error("Error fetching menu items:", error);
+  } finally {
+    setIsLoading(false);
+  }
+}
+
+export const getAvailableMenuItems = async (setAvailableItems, setIsLoading) => {
+  try {
+    setIsLoading(true);
+    const res = await axiosInstance.get("/api/menu/available");
+    if (res.status !== 200) {
+      throw new Error("Failed to fetch available menu items");
+    }
+    const data = res.data;
+    setAvailableItems(data);
+  } catch (error) {
+    console.error("Error fetching available menu items:", error);
+  } finally {
+    setIsLoading(false);
+  }
+}
+
+export const getComingSoonMenuItems = async (setComingSoonItems, setIsLoading, setError) => {
+  try {
+    setIsLoading(true);
+    const res = await axiosInstance.get("/api/menu/coming-soon");
+    if (res.status !== 200) {
+      throw new Error("Failed to fetch coming soon menu items");
+    }
+    const data = res.data;
+    setComingSoonItems(data);
+    setError(null);
+  } catch (error) {
+    console.error("Error fetching coming soon menu items:", error);
+    setError("Failed to fetch coming soon menu items. Please try again.");
   } finally {
     setIsLoading(false);
   }

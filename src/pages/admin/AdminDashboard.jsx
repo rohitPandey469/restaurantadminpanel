@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
 import { getReservations, updateReservationStatus } from "../../service/reserve";
 import { formatEURO } from "../../utils/formatEURO";
 import { getAllOrders, getOrderInfo, placeOrder, updateOrderStatus } from "../../service/orders";
-import { getMenuItems, updateMenuItem } from "../../service/menu";
+import { getAvailableMenuItems } from "../../service/menu";
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -151,7 +150,7 @@ const AdminDashboard = () => {
   }
 
   const fetchMenuItems = async () => {
-    await getMenuItems(setMenuItems, setIsMenuLoading);
+    await getAvailableMenuItems(setMenuItems, setIsMenuLoading);
   }
 
   const handleItemSelect = (item) => {

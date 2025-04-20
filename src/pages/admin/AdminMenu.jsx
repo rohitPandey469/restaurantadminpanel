@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { addMenuItem, getMenuItems, updateMenuItem, deleteMenuItem } from "../../service/menu";
+import { addMenuItem, updateMenuItem, deleteMenuItem, getAllMenuItems } from "../../service/menu";
 import { formatEURO } from "../../utils/formatEURO";
+import { dietaryOptions } from "../../utils/renderDietaryIcons";
 
 const AdminMenu = () => {
   const [menuItems, setMenuItems] = useState([])
@@ -13,7 +14,9 @@ const AdminMenu = () => {
     price: "",
     category: "main",
     image: "",
-    featured: false
+    featured: false,
+    available: true,
+    dietary: []
   });
 
   const [editMode, setEditMode] = useState(false);
@@ -33,22 +36,25 @@ const AdminMenu = () => {
     e.preventDefault();
     setError(null);
     setMessage(null);
-    
+    console.log("Form Data:", formData);
+
     try {
       if (editMode) {
         await updateMenuItem(formData._id, formData, setMessage, setError);
       } else {
         await addMenuItem(formData, setMessage, setError);
       }
-      
-      await getMenuItems(setMenuItems, setIsLoading);
+
+      await getAllMenuItems(setMenuItems, setIsLoading);
       setFormData({
         name: "",
         description: "",
         price: "",
         category: "Main Course",
         image: "",
-        featured: false
+        featured: false,
+        available: true,
+        dietary: []
       });
       setEditMode(false);
     } catch (err) {
@@ -71,7 +77,7 @@ const AdminMenu = () => {
       setMessage(null);
       try {
         await deleteMenuItem(id, setMessage, setError);
-        await getMenuItems(setMenuItems, setIsLoading);
+        await getAllMenuItems(setMenuItems, setIsLoading);
       } catch (err) {
         setError(err.message || "Failed to delete menu item");
       }
@@ -85,7 +91,9 @@ const AdminMenu = () => {
       price: "",
       category: "Main Course",
       image: "",
-      featured: false
+      featured: false,
+      available: true,
+      dietary: []
     });
     setEditMode(false);
     setError(null);
@@ -98,15 +106,15 @@ const AdminMenu = () => {
   // Filter and search menu items
   const filteredItems = menuItems
     .filter(item => filterCategory === "All" || item.category === filterCategory)
-    .filter(item => 
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    .filter(item =>
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
   useEffect(() => {
     const fetchMenuItems = async () => {
       try {
-        await getMenuItems(setMenuItems, setIsLoading);
+        await getAllMenuItems(setMenuItems, setIsLoading);
       } catch (err) {
         setError("Failed to load menu items");
         setIsLoading(false);
@@ -116,22 +124,22 @@ const AdminMenu = () => {
     return () => {
       setMenuItems([]);
     };
-  },[]);
+  }, []);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto p-4">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-800">Menu Management</h1>
         <p className="text-sm text-gray-500">
-          {menuItems.length} items in menu | {menuItems.filter(item => item.featured).length} featured
+          {menuItems.length} items in menu | {menuItems.filter(item => item.featured).length} featured | {menuItems.filter(item => item.available).length} available
         </p>
       </div>
-      
+
       {message && (
         <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded relative" role="alert">
           <span className="block sm:inline">{message}</span>
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="cursor-pointer absolute top-0 right-0 p-2 focus:outline-none"
             onClick={() => setMessage(null)}
           >
@@ -139,12 +147,12 @@ const AdminMenu = () => {
           </button>
         </div>
       )}
-      
+
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded relative" role="alert">
           <span className="block sm:inline">{error}</span>
-          <button 
-            type="button" 
+          <button
+            type="button"
             className="cursor-pointer absolute top-0 right-0 p-2 focus:outline-none"
             onClick={() => setError(null)}
           >
@@ -152,7 +160,7 @@ const AdminMenu = () => {
           </button>
         </div>
       )}
-      
+
       <div className="bg-white shadow rounded-lg p-6">
         <h2 className="text-lg font-medium mb-4">
           {editMode ? "Edit Menu Item" : "Add New Menu Item"}
@@ -170,7 +178,7 @@ const AdminMenu = () => {
                 className="p-2 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring focus:ring-amber-500 focus:ring-opacity-50"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700">Price (€)*</label>
               <input
@@ -185,7 +193,7 @@ const AdminMenu = () => {
                 className="p-2 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring focus:ring-amber-500 focus:ring-opacity-50"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700">Category*</label>
               <select
@@ -201,7 +209,7 @@ const AdminMenu = () => {
                 <option value="sides">Special</option>
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700">Image URL*</label>
               <div className="flex">
@@ -214,9 +222,9 @@ const AdminMenu = () => {
                   className="p-2 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring focus:ring-amber-500 focus:ring-opacity-50"
                 />
                 {formData.image && (
-                  <button 
+                  <button
                     type="button"
-                    onClick={() => setShowImagePreview(!showImagePreview)} 
+                    onClick={() => setShowImagePreview(!showImagePreview)}
                     className="cursor-pointer ml-2 mt-1 px-2 py-1 bg-amber-100 text-amber-700 rounded hover:bg-amber-200"
                   >
                     {showImagePreview ? "Hide" : "Preview"}
@@ -225,9 +233,9 @@ const AdminMenu = () => {
               </div>
               {showImagePreview && formData.image && (
                 <div className="mt-2">
-                  <img 
-                    src={formData.image} 
-                    alt="Preview" 
+                  <img
+                    src={formData.image}
+                    alt="Preview"
                     className="h-24 w-24 object-cover rounded border border-gray-300"
                     onError={(e) => {
                       e.target.onerror = null;
@@ -238,7 +246,7 @@ const AdminMenu = () => {
                 </div>
               )}
             </div>
-            
+
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700">Description*</label>
               <textarea
@@ -250,7 +258,7 @@ const AdminMenu = () => {
                 className="p-2 mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring focus:ring-amber-500 focus:ring-opacity-50"
               />
             </div>
-            
+
             <div className="flex items-center">
               <input
                 type="checkbox"
@@ -264,8 +272,85 @@ const AdminMenu = () => {
                 Featured Item | Chef's Choice
               </label>
             </div>
+
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="available"
+                name="available"
+                checked={formData.available}
+                onChange={handleInputChange}
+                className="h-4 w-4 text-amber-500 focus:ring-amber-500 border-gray-300 rounded"
+              />
+              <label htmlFor="featured" className="ml-2 block text-sm text-gray-700">
+                Available for Order
+              </label>
+            </div>
           </div>
-          
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Dietary Options</label>
+
+            <div className="relative">
+              {/* Selected tags display */}
+              <div className="flex flex-wrap gap-2 mb-2 min-h-[36px]">
+                {formData.dietary?.map((option) => (
+                  <div
+                    key={option}
+                    className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full flex items-center text-sm"
+                  >
+                    <span className="capitalize">{option}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updatedDietary = formData.dietary.filter(item => item !== option);
+                        setFormData({
+                          ...formData,
+                          dietary: updatedDietary
+                        });
+                      }}
+                      className="ml-2 focus:outline-none"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Dropdown for selecting options */}
+              <div className="relative">
+                <select
+                  className="p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring focus:ring-amber-500 focus:ring-opacity-50"
+                  onChange={(e) => {
+                    if (e.target.value && !formData.dietary?.includes(e.target.value)) {
+                      setFormData({
+                        ...formData,
+                        dietary: [...(formData.dietary || []), e.target.value]
+                      });
+                      // Reset select to default option after selection
+                      e.target.value = "";
+                    }
+                  }}
+                  value=""
+                >
+                  <option value="" disabled>Select dietary options...</option>
+                  {dietaryOptions
+                    .filter(option => !formData.dietary?.includes(option))
+                    .map(option => (
+                      <option key={option} value={option}>{option.charAt(0).toUpperCase() + option.slice(1)}</option>
+                    ))
+                  }
+                </select>
+              </div>
+
+              <p className="pl-2 mt-2 text-sm text-gray-500">
+                Select multiple dietary options from the dropdown
+              </p>
+            </div>
+          </div>
+
           <div className="flex justify-end space-x-3 pt-2">
             {editMode && (
               <button
@@ -285,12 +370,12 @@ const AdminMenu = () => {
           </div>
         </form>
       </div>
-      
+
       {/* Menu Items List */}
       <div className="bg-white shadow rounded-lg p-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-2 sm:space-y-0">
           <h2 className="text-lg font-medium">Current Menu Items</h2>
-          
+
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
             <div className="relative rounded-md shadow-sm">
               <input
@@ -306,7 +391,7 @@ const AdminMenu = () => {
                 </svg>
               </div>
             </div>
-            
+
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
@@ -318,7 +403,7 @@ const AdminMenu = () => {
             </select>
           </div>
         </div>
-        
+
         {isLoading ? (
           <div className="py-12 text-center">
             <svg className="animate-spin h-10 w-10 mx-auto text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -336,6 +421,8 @@ const AdminMenu = () => {
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Featured</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Available</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dietary</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
@@ -345,14 +432,14 @@ const AdminMenu = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-12 w-12">
-                          <img 
-                            className="h-12 w-12 rounded object-cover" 
-                            src={item.image} 
+                          <img
+                            className="h-12 w-12 rounded object-cover"
+                            src={item.image}
                             alt={item.name}
                             onError={(e) => {
                               e.target.onerror = null;
                               e.target.src = "https://via.placeholder.com/150?text=No+Image";
-                            }} 
+                            }}
                           />
                         </div>
                         <div className="ml-4">
@@ -370,22 +457,40 @@ const AdminMenu = () => {
                       {formatEURO(item.price)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        item.featured 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.featured
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                        }`}>
                         {item.featured ? 'Yes' : 'No'}
                       </span>
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${item.available
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                        }`}>
+                        {item.available ? 'Yes' : 'No'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex flex-wrap gap-1">
+                        {item.dietary && item.dietary.length > 0 ? item.dietary.map(option => (
+                          <span key={option} className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                            {option}
+                          </span>
+                        )) : (
+                          <span className="text-xs text-gray-500">None</span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button 
+                      <button
                         onClick={() => handleEdit(item)}
                         className="cursor-pointer text-amber-600 hover:text-amber-900 mr-3"
                       >
                         Edit
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDelete(item._id)}
                         className="cursor-pointer text-red-600 hover:text-red-900"
                       >

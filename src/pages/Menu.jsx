@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { formatEURO } from "../utils/formatEURO";
-import { getMenuItems } from "../service/menu";
+import { getAvailableMenuItems } from "../service/menu";
+import { renderDietaryIcons } from "../utils/renderDietaryIcons";
 
 const Menu = () => {
   const [activeCategory, setActiveCategory] = useState("all");
@@ -19,7 +20,7 @@ const Menu = () => {
   // Fetch menu items on component mount
   useEffect(() => {
     const fetchMenuItems = async () => {
-      await getMenuItems(setMenuItems, setIsLoading);
+      await getAvailableMenuItems(setMenuItems, setIsLoading);
     };
     fetchMenuItems();
 
@@ -51,26 +52,6 @@ const Menu = () => {
 
     return () => clearTimeout(timer);
   }, [activeCategory, filteredItems.length]); // Added filteredItems.length as dependency
-
-  // Function to render dietary indicators
-  const renderDietaryIcons = (dietary) => {
-    if (!dietary || dietary.length === 0) return null;
-
-    return (
-      <div className="flex gap-1 mt-1">
-        {dietary.includes("vegetarian") && (
-          <span title="Vegetarian" className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">
-            Veg
-          </span>
-        )}
-        {dietary.includes("gluten-free") && (
-          <span title="Gluten Free" className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
-            GF
-          </span>
-        )}
-      </div>
-    );
-  };
 
   return (
     <div className="bg-amber-50 min-h-screen">
